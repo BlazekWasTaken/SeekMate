@@ -11,5 +11,8 @@ data class Game(
     val round_no: Int = -1,
     val user1: String?,
     val user2: String? = null,
-    val won: Boolean? = null
+    val won: Boolean? = null,
+    val controller_address: String? = null,
+    val controller_preamble: String? = null,
+    val controlee_address: String? = null,
 )

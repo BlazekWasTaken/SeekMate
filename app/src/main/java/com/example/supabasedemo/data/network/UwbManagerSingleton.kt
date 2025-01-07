@@ -30,7 +30,7 @@ object UwbManagerSingleton {
 
     private var uwbManager: UwbManager? = null
     private var sessionScope: UwbClientSessionScope? = null
-    private var isController: Boolean = true
+    var isController: Boolean = true
     private var sessionJob: Job? = null
 
     private var isStarted: Boolean = false
@@ -146,6 +146,7 @@ object UwbManagerSingleton {
             is RangingResultPosition -> {
                 _azimuth.value = result.position.azimuth?.value ?: -1F
                 _distance.value = result.position.distance?.value ?: -1F
+                Log.d("uwb", "Distance: ${_distance.value} Azimuth: ${_azimuth.value}")
             }
 
             is RangingResultPeerDisconnected -> {

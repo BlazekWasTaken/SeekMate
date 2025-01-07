@@ -24,13 +24,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.concurrent.Executors
 
 private const val CAMERA_PERMISSION_REQUEST_CODE = 101
 
 @Composable
 fun QRCodeScanner(
-    onScanSuccess: (String) -> Unit,
+    onScanSuccess: (String, String, String) -> Unit,
     onScanError: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -101,7 +103,7 @@ fun QRCodeScanner(
 fun processImageProxy(
     scanner: BarcodeScanner,
     imageProxy: ImageProxy,
-    onScanSuccess: (String) -> Unit,
+    onScanSuccess: (String, String, String) -> Unit,
     onScanError: () -> Unit
 ) {
     val mediaImage = imageProxy.image
@@ -111,7 +113,22 @@ fun processImageProxy(
             .addOnSuccessListener { barcodes ->
                 for (barcode in barcodes) {
                     barcode.rawValue?.let { qrCode ->
-                        onScanSuccess(qrCode)
+                        try {
+                            val qrData = JSONObject(qrCode)
+                            val gameUuid = qrData.optString("game_uuid", "")
+                            val deviceAddress = qrData.optString("device_address", "")
+                            val devicePreamble = qrData.optString("device_preamble", "")
+
+                            if (gameUuid.isNotEmpty() && deviceAddress.isNotEmpty() && devicePreamble.isNotEmpty()) {
+                                onScanSuccess(gameUuid, deviceAddress, devicePreamble)
+                            } else {
+                                Log.e("QRCodeScanner", "QR code missing required fields")
+                                onScanError()
+                            }
+                        } catch (e: JSONException) {
+                            Log.e("QRCodeScanner", "Failed to parse QR code JSON: ${e.message}")
+                            onScanError()
+                        }
                     }
                 }
             }

@@ -20,8 +20,9 @@ class SupabaseDbHelper(
         gameUuid: String,
         onGameJoined: (Game) -> Unit,
         onError: (String) -> Unit,
-        currentUser: JsonObject?
-    ) {
+        currentUser: JsonObject?,
+        controleeAddress: String,
+        ) {
         val user2Uuid = currentUser?.get("sub").toString().trim().replace("\"", "")
 
         runBlocking {
@@ -30,6 +31,7 @@ class SupabaseDbHelper(
                     client.from("games").update(
                         {
                             Game::user2 setTo user2Uuid
+                            Game::controlee_address setTo controleeAddress
                         }
                     ) {
                         select()
@@ -49,11 +51,15 @@ class SupabaseDbHelper(
         gameUuid: String,
         onGameCreated: (Game) -> Unit,
         onError: (String) -> Unit,
-        currentUser: JsonObject?
+        currentUser: JsonObject?,
+        controllerAddress: String,
+        controllerPreamble: String
     ): Game {
         val gameData = Game(
             uuid = gameUuid,
             user1 = currentUser?.get("sub").toString().trim().replace("\"", ""),
+            controller_address = controllerAddress,
+            controller_preamble = controllerPreamble
         )
 
         runBlocking {

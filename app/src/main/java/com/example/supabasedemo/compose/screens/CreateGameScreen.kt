@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,10 +29,12 @@ import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.compose.views.QRCodeScanner
 import com.example.supabasedemo.data.model.Game
 import com.example.supabasedemo.data.model.UserState
+import com.example.supabasedemo.data.network.UwbManagerSingleton
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
+import org.json.JSONObject
 import java.util.UUID
 
 @Composable
@@ -39,18 +42,26 @@ fun CreateGameScreen(
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ) {
-    val viewModel = MainViewModel(LocalContext.current, setState = { setState(it) })
+    val context = LocalContext.current
+    val viewModel = MainViewModel(context, setState = { setState(it) })
 
     var qrCodeBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var scannedQRCode by remember { mutableStateOf<String?>(null) }
+    var scannedGameUuid by remember { mutableStateOf<String?>(null) }
+    var scannedDeviceAddress by remember { mutableStateOf<String?>(null) }
+    var scannedDevicePreamble by remember { mutableStateOf<String?>(null) }
+
     var gameDetails by remember { mutableStateOf<Game?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val deviceAddress by UwbManagerSingleton.address.collectAsState(initial = "-1")
+    val devicePreamble by UwbManagerSingleton.preamble.collectAsState(initial = "-1")
 
     var gameSubscription by remember { mutableStateOf<Game?>(null) }
 
     LaunchedEffect(Unit) {
         setState(UserState.InGameCreation)
         viewModel.supabaseAuth.isUserLoggedIn()
+        UwbManagerSingleton.initialize(context, true)
     }
 
     if (gameDetails != null) {
@@ -87,14 +98,16 @@ fun CreateGameScreen(
                 gameDetails = viewModel.supabaseDb.createGameInSupabase(
                     gameUuid,
                     onGameCreated = {
-                        qrCodeBitmap = generateQRCode(gameUuid) ?: run {
+                        qrCodeBitmap = generateQRCode(gameUuid, deviceAddress, devicePreamble) ?: run {
                             errorMessage = "Error generating QR code"
                             return@createGameInSupabase
                         }
                         setState(UserState.GameCreated)
                     },
                     onError = { errorMessage = it },
-                    currentUser = viewModel.supabaseAuth.getCurrentUser()
+                    currentUser = viewModel.supabaseAuth.getCurrentUser(),
+                    controllerAddress = deviceAddress,
+                    controllerPreamble = devicePreamble
                 )
             }
         ) {
@@ -104,6 +117,7 @@ fun CreateGameScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.CameraOpened)
+                UwbManagerSingleton.setRoleAsController(false, context)
             }
         ) {
             Text("Join Game")
@@ -122,19 +136,23 @@ fun CreateGameScreen(
 
             is UserState.CameraOpened -> {
                 QRCodeScanner(
-                    onScanSuccess = {
-                        scannedQRCode = it
-                        scannedQRCode?.let { gameUuid ->
-                            viewModel.supabaseDb.joinGameInSupabase(
-                                gameUuid,
-                                onGameJoined = { game ->
-                                    gameDetails = game
-                                    Log.d("QRCodeScanner", "Joined game: $gameUuid")
-                                },
-                                onError = { errorMessage = it },
-                                currentUser = viewModel.supabaseAuth.getCurrentUser()
-                            )
-                        }
+                    onScanSuccess = { gameUuid, scannedAddress, scannedPreamble ->
+                        scannedGameUuid = gameUuid
+                        scannedDeviceAddress = scannedAddress
+                        scannedDevicePreamble = scannedPreamble
+                        Log.d("QRCodeScanner", "Scanned Data - Game UUID: $gameUuid, Address: $deviceAddress, Preamble: $devicePreamble")
+
+                        viewModel.supabaseDb.joinGameInSupabase(
+                            gameUuid = gameUuid,
+                            onGameJoined = { game ->
+                                gameDetails = game
+                                Log.d("QRCodeScanner", "Joined game: $game")
+                            },
+                            onError = { errorMessage = it },
+                            currentUser = viewModel.supabaseAuth.getCurrentUser(),
+                            controleeAddress = deviceAddress,
+                        )
+
                         setState(UserState.QrScanned)
                     },
                     onScanError = {
@@ -145,7 +163,6 @@ fun CreateGameScreen(
             }
 
             is UserState.QrScanned -> {
-                Text("Scanned QR Code: $scannedQRCode")
                 Spacer(modifier = Modifier.padding(16.dp))
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Game Details")
@@ -168,12 +185,18 @@ fun CreateGameScreen(
     }
 }
 
-private fun generateQRCode(text: String): Bitmap? {
+private fun generateQRCode(gameUuid: String, deviceAddress: String, devicePreamble: String): Bitmap? {
+    val qrData = JSONObject().apply {
+        put("game_uuid", gameUuid)
+        put("device_address", deviceAddress)
+        put("device_preamble", devicePreamble)
+    }.toString()
+
     val writer = QRCodeWriter()
     return try {
-        Log.d("QRCode", "Attempting to encode QR code for text: $text")
+        Log.d("QRCode", "Attempting to encode QR code for qrData: $qrData")
 
-        val bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 512, 512)
+        val bitMatrix = writer.encode(qrData, BarcodeFormat.QR_CODE, 512, 512)
         val width = bitMatrix.width
         val height = bitMatrix.height
 

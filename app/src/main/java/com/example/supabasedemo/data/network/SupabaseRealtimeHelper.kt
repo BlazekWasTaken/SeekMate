@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavController
 import com.example.supabasedemo.MainActivity
+import com.example.supabasedemo.MainActivity.Demo
 import com.example.supabasedemo.MainActivity.LoginChoice
 import com.example.supabasedemo.MainActivity.MainMenu
 import com.example.supabasedemo.MainActivity.MiniGame
@@ -47,9 +48,23 @@ class SupabaseRealtimeHelper(
             onGameUpdate(updatedGame)
             Log.e("Supabase-Realtime", "Game updated: $updatedGame")
 
+            if (updatedGame.user1 != null && updatedGame.user2 != null) {
+                if (UwbManagerSingleton.isController) {
+                    UwbManagerSingleton.startSession(
+                        partnerAddress = updatedGame.controlee_address ?: "-5",
+                        preamble = "0"
+                    )
+                } else {
+                    UwbManagerSingleton.startSession(
+                        partnerAddress = updatedGame.controller_address ?: "-5",
+                        preamble = updatedGame.controller_preamble ?: "-5"
+                    )
+                }
+            }
+
             when (updatedGame.round_no) {
                 1 -> {
-                    NavControllerProvider.navController.navigate(route = MainMenu)
+                    NavControllerProvider.navController.navigate(route = Demo)
                 }
                 2 -> {
                     NavControllerProvider.navController.navigate(route = MiniGame)

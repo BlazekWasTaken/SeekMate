@@ -65,7 +65,9 @@ fun UwbScreen(
     var permissionGranted by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        UwbManagerSingleton.initialize(context, isController)
+        if(!isStarted){
+            UwbManagerSingleton.initialize(context, isController)
+        }
 
         permissionGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.UWB_RANGING
