@@ -102,7 +102,6 @@ class MainActivity : ComponentActivity() {
                     setState = { setState(it) },
                     round = backStackEntry.arguments?.getInt("round") ?: 0,
                     gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: "",
-                    isController = backStackEntry.arguments?.getBoolean("isController") ?: false,
                     viewModel = viewModel
                 )
             }
@@ -262,7 +261,6 @@ class MainActivity : ComponentActivity() {
                         },
                         round = 0,
                         gameUuid = "test-uuid",
-                        isController = false,
                         viewModel = viewModel)
                 }
                 composable("minigame") {
@@ -274,7 +272,6 @@ class MainActivity : ComponentActivity() {
                         setState = { setState(it) },
                         round = -1,
                         gameUuid = "uuid",
-                        isController = false,
                         viewModel = viewModel
                     )
                 }
