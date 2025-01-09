@@ -4,6 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class UserState {
+    data class InWaitingScreen(val score: Int, val round: Int, val gameUuid: String, val isController: Boolean) : UserState()
+
     data object InLoginChoice : UserState()
     data object InLogin : UserState()
     data object InSignup : UserState()
