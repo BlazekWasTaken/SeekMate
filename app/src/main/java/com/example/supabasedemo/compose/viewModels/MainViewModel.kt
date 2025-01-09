@@ -1,6 +1,8 @@
 package com.example.supabasedemo.compose.viewModels
 
 import android.content.Context
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.supabasedemo.data.model.UserState
@@ -18,4 +20,21 @@ class MainViewModel(
         SupabaseDbHelper(setState = { setState(it) })
     val supabaseRealtime: SupabaseRealtimeHelper =
         SupabaseRealtimeHelper(viewModelScope, setState = { setState(it) }, context)
+
+    private val _score = mutableStateOf(0)
+    val score: State<Int> get() = _score
+
+    fun incrementScore() {
+        _score.value += 1
+    }
+
+    fun decrementScore() {
+        if (_score.value > 0) {
+            _score.value -= 1
+        }
+    }
+
+    fun setScore(newScore: Int) {
+        _score.value = newScore
+    }
 }
