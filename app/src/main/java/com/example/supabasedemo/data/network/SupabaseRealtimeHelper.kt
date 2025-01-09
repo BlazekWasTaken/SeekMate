@@ -62,18 +62,36 @@ class SupabaseRealtimeHelper(
                 }
             }
 
-            when (updatedGame.round_no) {
-                1 -> {
+            when {
+                updatedGame.round_no == -1 -> {
                     NavControllerProvider.navController.navigate(route = Demo)
                 }
-                2 -> {
-                    NavControllerProvider.navController.navigate(route = MiniGame)
+                updatedGame.round_no == 0 -> {
+                    Log.e("Supabase-Realtime", "Waiting for players to join...")
                 }
-                3 -> {
-                    NavControllerProvider.navController.navigate(route = Settings)
+                updatedGame.round_no % 2 == 1 -> {
+                    if (UwbManagerSingleton.isController) {
+                        NavControllerProvider.navController.navigate(
+                            "minigame/${updatedGame.round_no}/${updatedGame.uuid}/${UwbManagerSingleton.isController}"
+                        )
+                    } else {
+                        NavControllerProvider.navController.navigate(
+                            "waiting/${updatedGame.uuid}/${updatedGame.round_no}/0/${UwbManagerSingleton.isController}"
+                        )
+                    }
+                }
+                else -> {
+                    if (UwbManagerSingleton.isController) {
+                        NavControllerProvider.navController.navigate(
+                            "waiting/${updatedGame.uuid}/${updatedGame.round_no}/0/${UwbManagerSingleton.isController}"
+                        )
+                    } else {
+                        NavControllerProvider.navController.navigate(
+                            "minigame/${updatedGame.round_no}/${updatedGame.uuid}/${UwbManagerSingleton.isController}"
+                        )
+                    }
                 }
             }
-
         }.launchIn(scope)
 
         channel.subscribe()
