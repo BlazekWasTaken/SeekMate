@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.AppTheme
 import kotlinx.coroutines.delay
@@ -71,13 +72,14 @@ fun MinigameScreen(
     onNavigateToMainMenu: () -> Unit,
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit,
-    round: Int = 0
+    round: Int = 0,
+    gameUuid: String,
+    viewModel: MainViewModel
 ) {
     LaunchedEffect(Unit) {
         setState(UserState.InMiniGame)
     }
 
-    var score by remember { mutableIntStateOf(0) }
     var isMoving by remember { mutableStateOf(false) }
     var latestSensorRead by remember { mutableStateOf(System.currentTimeMillis()) }
 
@@ -91,7 +93,16 @@ fun MinigameScreen(
             delay(1000)
             timeLeft--
         }
-        setState(UserState.InMainMenu)
+            viewModel.supabaseDb.updateRoundNumber(
+                gameUuid,
+                round + 1,
+                onSuccess = {
+                    setState(UserState.InMainMenu)
+                },
+                onError = {
+                    setState(UserState.InMainMenu)
+                }
+            )
     }
 
 
@@ -138,9 +149,7 @@ fun MinigameScreen(
     LaunchedEffect(isMoving) {
         while (true) {
             if (isMoving) {
-                if (score > 0) {
-                    score--
-                }
+                viewModel.decrementScore()
             }
             delay(1000)
         }
@@ -170,7 +179,7 @@ fun MinigameScreen(
                 modifier = Modifier.padding(16.dp)
             )
             Text(
-                text = "Score: $score",
+                text = "Score: ${viewModel.score.value}",
                 fontSize = 24.sp,
                 modifier = Modifier.padding(8.dp)
             )
@@ -360,9 +369,7 @@ fun MinigameScreen(
                                 .offset(x = redOffsetXDp, y = redOffsetYDp)
                                 .background(Color.Red, CircleShape)
                                 .clickable {
-                                    if (score > 0) {
-                                        score--
-                                    }
+                                    viewModel.decrementScore()
                                     redCircle.isVisible = false
                                 }
                         )
@@ -380,9 +387,7 @@ fun MinigameScreen(
                                 .offset(x = greenSquareOffsetXDp, y = greenSquareOffsetYDp)
                                 .background(Color.Green)
                                 .clickable {
-                                    if (score > 0) {
-                                        score--
-                                    }
+                                    viewModel.decrementScore()
                                     greenSquare.isVisible = false
                                 }
                         )
@@ -396,7 +401,7 @@ fun MinigameScreen(
                             .offset(x = greenOffsetXDp, y = greenOffsetYDp)
                             .background(Color.Green, CircleShape)
                             .clickable {
-                                score++
+                                viewModel.incrementScore()
                                 isGreenVisible = false
                             }
                     )
@@ -408,19 +413,5 @@ fun MinigameScreen(
                 modifier = Modifier.padding(bottom = 60.dp)
             )
         }
-    }
-
-    BackHandler {
-        setState(UserState.InMainMenu)
-    }
-
-    val userState = getState().value
-    when (userState) {
-        is UserState.InMainMenu -> {
-            LaunchedEffect(Unit) {
-                onNavigateToMainMenu()
-            }
-        }
-        else -> {}
     }
 }
