@@ -10,6 +10,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
+import kotlin.math.absoluteValue
 
 object SensorManagerSingleton {
     private var sensorManager: SensorManager? = null
@@ -43,11 +44,13 @@ object SensorManagerSingleton {
         initializationDeferred = CompletableDeferred()
 
         try {
+            sensorManager!!.registerGravity()
             sensorManager!!.registerLinearAccelerometer()
             sensorManager!!.registerAccelerometer()
             sensorManager!!.registerGyroscope()
             sensorManager!!.registerMagnetometer()
             sensorManager!!.registerOrientation()
+
 
             initializationDeferred?.complete(Unit)
             isStarted = true
@@ -164,7 +167,7 @@ object SensorManagerSingleton {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event == null) return
                 val reading = Reading(event.values[0], event.values[1], event.values[2])
-                _magnetometerReadingsFlow.value += reading
+                _gravityReadingsFlow.value += reading
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
             }
@@ -178,9 +181,9 @@ object SensorManagerSingleton {
 }
 
 class Reading(
-    val x: Float,
-    val y: Float,
-    val z: Float,
+    var x: Float,
+    var y: Float,
+    var z: Float,
 )
 
 fun Float.fixForScreen(): String {
@@ -190,4 +193,42 @@ fun Float.fixForScreen(): String {
     else {
         " " + String.format(Locale.getDefault(), "%.3f", this)
     }
+}
+
+fun List<Reading>.avg(): Reading {
+    var value: Reading = Reading(0F, 0F, 0F)
+    for (aa in this) {
+        value.x += aa.x
+        value.y += aa.y
+        value.z += aa.z
+    }
+    value = Reading(
+        value.x / this.size,
+        value.y / this.size,
+        value.z / this.size
+    )
+    return value
+}
+
+fun percentageBetween(a: Float, b: Float, x: Float): Float {
+    return (x - a) / (b - a)
+}
+
+fun getForwardAcceleration(): Float {
+    var gravity: Reading = SensorManagerSingleton.gravityReadingsFlow.value.last()
+    var acceleration: Reading = SensorManagerSingleton.accelerometerReadingsFlow.value.takeLast(20).avg()
+
+    var movement: Reading = Reading(
+        acceleration.x - gravity.x,
+        acceleration.y - gravity.y,
+        acceleration.z - gravity.z
+    )
+
+    var percentX = percentageBetween(0F, 9.81F, gravity.x.absoluteValue)
+    var percentZ = percentageBetween(0F, 9.81F, gravity.z.absoluteValue)
+
+    var valueX = movement.x * (1 - percentX)
+    var valueZ = movement.z * percentZ
+
+    return valueZ + valueX
 }

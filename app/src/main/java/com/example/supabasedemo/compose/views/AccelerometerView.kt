@@ -15,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.supabasedemo.data.network.SensorManagerSingleton
+import com.example.supabasedemo.data.network.avg
 import com.example.supabasedemo.data.network.fixForScreen
+import com.example.supabasedemo.data.network.getForwardAcceleration
 import com.example.supabasedemo.ui.theme.AppTheme
 import java.util.Locale
 
@@ -23,7 +25,8 @@ import java.util.Locale
 fun AccelerometerView(
     context: Context
 ) {
-    val accelerations by SensorManagerSingleton.accelerometerReadingsFlow.collectAsState()
+    val accelerations by SensorManagerSingleton.linearAccelerometerReadingsFlow.collectAsState()
+    val gravity by SensorManagerSingleton.gravityReadingsFlow.collectAsState()
 
     LaunchedEffect(Unit) {
         SensorManagerSingleton.initialize(context)
@@ -39,9 +42,15 @@ fun AccelerometerView(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "ACCELEROMETER")
-            Text(text = "x: " + accelerations.last().x.fixForScreen())
-            Text(text = "y: " + accelerations.last().y.fixForScreen())
-            Text(text = "z: " + accelerations.last().z.fixForScreen())
+            Text(text = "x: " + (accelerations.takeLast(20).avg().x * 100).fixForScreen())
+            Text(text = "y: " + (accelerations.takeLast(20).avg().y * 100).fixForScreen())
+            Text(text = "z: " + (accelerations.takeLast(20).avg().z * 100).fixForScreen())
+            Text(text = "GRAVITY")
+            Text(text = "x: " + gravity.last().x.fixForScreen())
+            Text(text = "y: " + gravity.last().y.fixForScreen())
+            Text(text = "z: " + gravity.last().z.fixForScreen())
+            Text(text = "FORWARD")
+            Text(text = (getForwardAcceleration() * 100).fixForScreen())
         }
     }
 }
