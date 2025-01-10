@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,8 +38,12 @@ import com.example.supabasedemo.compose.views.GyroscopeView
 import com.example.supabasedemo.compose.views.RotationView
 import com.example.supabasedemo.compose.views.UwbDataView
 import com.example.supabasedemo.data.model.UserState
+import com.example.supabasedemo.data.network.SupabaseDbHelper
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.example.supabasedemo.ui.theme.MyOutlinedTextField
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
@@ -62,12 +67,15 @@ fun UwbScreen(
     val deviceAddress by UwbManagerSingleton.address.collectAsState(initial = "-1")
     val devicePreamble by UwbManagerSingleton.preamble.collectAsState(initial = "-1")
 
+    var kochamGotowacId: Int by remember { mutableIntStateOf(0) }
+
     var permissionGranted by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if(!isStarted){
             UwbManagerSingleton.initialize(context, isController)
         }
+        kochamGotowacId = Random.nextInt(0, 1000)
 
         permissionGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.UWB_RANGING
@@ -114,17 +122,27 @@ fun UwbScreen(
                 placeholder = { Text(text = "Enter Preamble Value") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+            Spacer(modifier = Modifier.padding(8.dp))
+            MyOutlinedTextField(
+                value = kochamGotowacId.toString(),
+                onValueChange = {
+                    kochamGotowacId = if(it != "") it.toInt() else 0 },
+                placeholder = { Text(text = "Enter kochamGotowacId Value") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
         }
         Spacer(modifier = Modifier.padding(8.dp))
         Text(text = "Your Device Address: $deviceAddress")
         if (isController) {
             Text(text = "Your Preamble: $devicePreamble")
+            Text(text = "Your kochamGotowacId: $kochamGotowacId")
         }
         Spacer(modifier = Modifier.padding(8.dp))
         if (!isStarted) {
             MyOutlinedButton(onClick = {
                 if (address.isNotBlank()) {
                     if (isController) {
+                        viewModel.supabaseDb.createKochamGotowac(kochamGotowacId)
                         UwbManagerSingleton.startSession(address, "0")
                     } else {
                         UwbManagerSingleton.startSession(address, preamble)
@@ -159,7 +177,7 @@ fun UwbScreen(
             RotationView(context)
         }
         Spacer(modifier = Modifier.padding(8.dp))
-        ArrowView()
+        ArrowView(viewModel, getKochamGotowac = { return@ArrowView kochamGotowacId})
 
         BackHandler {
             setState(UserState.InMainMenu)

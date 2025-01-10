@@ -78,4 +78,22 @@ class SupabaseRealtimeHelper(
 
         channel.subscribe()
     }
+
+    suspend fun subscribeToKochamGotowac (id: Int, onKochamGotowacUpdate: (KochamGotowac) -> Unit) {
+        val channel = client.channel("distance_sessions"){}
+        try {
+            val kochamGotowacFlow: Flow<KochamGotowac> = channel.postgresSingleDataFlow(
+                schema = "public",
+                table = "distance_sessions",
+                primaryKey = KochamGotowac::id
+            ) {
+                eq("id", id)
+            }
+            kochamGotowacFlow.onEach { updatedKochamGotowac ->
+                onKochamGotowacUpdate(updatedKochamGotowac)
+
+            }.launchIn(scope)
+            channel.subscribe()
+        } catch (_: Exception) {}
+    }
 }
