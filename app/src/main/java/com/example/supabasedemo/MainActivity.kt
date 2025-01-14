@@ -24,6 +24,7 @@ import androidx.navigation.navArgument
 import com.example.supabasedemo.compose.screens.AccountInfoScreen
 import com.example.supabasedemo.compose.screens.ChoiceScreen
 import com.example.supabasedemo.compose.screens.CreateGameScreen
+import com.example.supabasedemo.compose.screens.EndGameScreen
 import com.example.supabasedemo.compose.screens.LoginScreen
 import com.example.supabasedemo.compose.screens.MainMenuScreen
 import com.example.supabasedemo.compose.screens.SettingsScreen
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val MINIGAME_ROUTE = "minigame/{round}/{gameUuid}/{isController}"
         const val WAITING_ROUTE = "waiting/{gameUuid}/{round}/{score}/{isController}"
+        const val ENDGAME_ROUTE = "endgame/{gameUuid}"
     }
     private val permissionRequestCode = 101
 
@@ -95,6 +97,9 @@ class MainActivity : ComponentActivity() {
                 )
             ) { backStackEntry ->
                 MinigameScreen(
+                    onNavigateToEndGame = {
+                        navController.navigate(EndGame)
+                    },
                     onNavigateToMainMenu = {
                         navController.popBackStack()
                     },
@@ -127,6 +132,18 @@ class MainActivity : ComponentActivity() {
                     getState = { _userState },
                     setState = { setState(it) },
                     viewModel = viewModel
+                )
+            }
+
+            composable(
+                route = ENDGAME_ROUTE,
+                arguments = listOf(
+                    navArgument("gameUuid") { type = NavType.StringType },
+                )
+            ) { backStackEntry ->
+                EndGameScreen(
+                    getState = { _userState },
+                    setState = { setState(it) }
                 )
             }
 
@@ -214,6 +231,9 @@ class MainActivity : ComponentActivity() {
                         onNavigateToMiniGame = {
                             navController.navigate(route = MiniGame)
                         },
+                        onNavigateToEndGame = {
+                            navController.navigate(route = EndGame)
+                        },
                         getState = {
                             return@MainMenuScreen _userState
                         },
@@ -249,8 +269,21 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+                composable<EndGame> {
+                    EndGameScreen(
+                        getState = {
+                            return@EndGameScreen _userState
+                        },
+                        setState = {
+                            setState(it)
+                        }
+                    )
+                }
                 composable<MiniGame> {
                     MinigameScreen(
+                        onNavigateToEndGame = {
+                            navController.navigate(EndGame)
+                        },
                         onNavigateToMainMenu = {
                             navController.popBackStack()
                         },
@@ -262,10 +295,14 @@ class MainActivity : ComponentActivity() {
                         },
                         round = 0,
                         gameUuid = "test-uuid",
-                        viewModel = viewModel)
+                        viewModel = viewModel
+                    )
                 }
                 composable("minigame") {
                     MinigameScreen(
+                        onNavigateToEndGame = {
+                            navController.navigate(EndGame)
+                        },
                         onNavigateToMainMenu = {
                             navController.popBackStack()
                         },
@@ -273,7 +310,7 @@ class MainActivity : ComponentActivity() {
                         setState = { setState(it) },
                         round = -1,
                         gameUuid = "uuid",
-                        viewModel = viewModel
+                        viewModel = viewModel,
                     )
                 }
             }
@@ -385,6 +422,9 @@ class MainActivity : ComponentActivity() {
 
     @Serializable
     object MiniGame
+
+    @Serializable
+    object EndGame
 
     @Serializable
     object Settings

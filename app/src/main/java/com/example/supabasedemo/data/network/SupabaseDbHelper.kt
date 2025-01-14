@@ -13,7 +13,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import kotlin.random.Random
 
 class SupabaseDbHelper(
     val setState: (UserState) -> Unit,
@@ -151,8 +150,8 @@ class SupabaseDbHelper(
         return gameData
     }
 
-    fun createKochamGotowac (a: Int) {
-        val b = KochamGotowac(a, 0F)
+    fun createDirection (a: Int) {
+        val b = DirectionRecord(a, 0F)
         runBlocking {
             try {
                 client.from("distance_sessions")
@@ -161,27 +160,27 @@ class SupabaseDbHelper(
         }
     }
 
-    fun sendKochamGotowac (id: Int, direction: Float) {
+    fun sendDirection (id: Int, direction: Float) {
         runBlocking {
             try {
                 client.from("distance_sessions").update(
                     {
-                        KochamGotowac::direction setTo direction
+                        DirectionRecord::direction setTo direction
                     }
                 ) {
                     select()
-                    filter { KochamGotowac::id eq id }
+                    filter { DirectionRecord::id eq id }
                 }
-                Log.e("kocham", "siemanko try $id")
-            } catch (_: Exception){
-                Log.e("kocham", "siemanko catch $id")
+                Log.e("direction", "try $id")
+            } catch (e: Exception){
+                Log.e("direction","$id");
             }
         }
     }
 }
 
 @Serializable
-class KochamGotowac (
+class DirectionRecord (
     val id: Int,
     val direction: Float
 )

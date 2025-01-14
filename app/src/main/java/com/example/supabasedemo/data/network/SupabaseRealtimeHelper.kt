@@ -2,31 +2,19 @@ package com.example.supabasedemo.data.network
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.navigation.NavController
-import com.example.supabasedemo.MainActivity
 import com.example.supabasedemo.MainActivity.Demo
-import com.example.supabasedemo.MainActivity.LoginChoice
-import com.example.supabasedemo.MainActivity.MainMenu
 import com.example.supabasedemo.MainActivity.MiniGame
 import com.example.supabasedemo.MainActivity.Settings
-import com.example.supabasedemo.MainActivity.Tutorial
 import com.example.supabasedemo.NavControllerProvider
 import com.example.supabasedemo.data.model.Game
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.data.network.SupabaseClient.client
-import io.github.jan.supabase.annotations.SupabaseExperimental
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
-import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.postgresSingleDataFlow
-import io.github.jan.supabase.realtime.selectSingleValueAsFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 class SupabaseRealtimeHelper(
     private val scope: CoroutineScope,
@@ -97,18 +85,18 @@ class SupabaseRealtimeHelper(
         channel.subscribe()
     }
 
-    suspend fun subscribeToKochamGotowac (id: Int, onKochamGotowacUpdate: (KochamGotowac) -> Unit) {
+    suspend fun subscribeToDirection (id: Int, onDirectionUpdate: (DirectionRecord) -> Unit) {
         val channel = client.channel("distance_sessions"){}
         try {
-            val kochamGotowacFlow: Flow<KochamGotowac> = channel.postgresSingleDataFlow(
+            val directionFlow: Flow<DirectionRecord> = channel.postgresSingleDataFlow(
                 schema = "public",
                 table = "distance_sessions",
-                primaryKey = KochamGotowac::id
+                primaryKey = DirectionRecord::id
             ) {
                 eq("id", id)
             }
-            kochamGotowacFlow.onEach { updatedKochamGotowac ->
-                onKochamGotowacUpdate(updatedKochamGotowac)
+            directionFlow.onEach { updateDirection ->
+                onDirectionUpdate(updateDirection)
 
             }.launchIn(scope)
             channel.subscribe()

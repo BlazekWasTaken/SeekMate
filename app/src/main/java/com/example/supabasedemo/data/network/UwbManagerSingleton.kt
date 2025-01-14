@@ -50,13 +50,15 @@ object UwbManagerSingleton {
 
     private var initializationDeferred: CompletableDeferred<Unit>? = null
 
+    private val _distanceReadingsFlow = MutableStateFlow(listOf(0F))
+    val distanceReadingsFlow: StateFlow<List<Float>> get() = _distanceReadingsFlow
+
     fun initialize(context: Context, isController: Boolean) {
         stopSession()
         UwbManagerSingleton.isController = isController
         uwbManager = UwbManager.createInstance(context)
         initializationDeferred = CompletableDeferred()
 
-        // TODO mv it to separate dispatchable job
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 sessionScope = if (isController) {
@@ -140,6 +142,7 @@ object UwbManagerSingleton {
             is RangingResultPosition -> {
                 _azimuth.value = result.position.azimuth?.value ?: -1F
                 _distance.value = result.position.distance?.value ?: -1F
+                _distanceReadingsFlow.value += result.position.distance?.value ?: -1F
                 Log.d("uwb", "Distance: ${_distance.value} Azimuth: ${_azimuth.value}")
             }
 
@@ -199,7 +202,7 @@ object UwbManagerSingleton {
 
     suspend fun getDeviceAddressSafe(): Short {
         waitForInitialization()
-        return Shorts.fromByteArray(sessionScope?.localAddress?.address)
+        return Shorts.fromByteArray(sessionScope?.localAddress?.address!!)
     }
 
     suspend fun getDevicePreambleSafe(): String? {

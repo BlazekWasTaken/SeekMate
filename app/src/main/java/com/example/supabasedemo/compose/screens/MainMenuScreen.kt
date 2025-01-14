@@ -25,6 +25,7 @@ fun MainMenuScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToStats: () -> Unit,
     onNavigateToMiniGame: () -> Unit,
+    onNavigateToEndGame: () -> Unit,
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ) {
@@ -131,6 +132,12 @@ fun MainMenuScreen(
         is UserState.InMiniGame -> {
             LaunchedEffect(Unit) {
                 onNavigateToMiniGame()
+            }
+        }
+
+        is UserState.InEndGame -> {
+            LaunchedEffect(Unit) {
+                onNavigateToEndGame()
             }
         }
 

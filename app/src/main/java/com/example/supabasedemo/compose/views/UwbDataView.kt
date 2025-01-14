@@ -31,7 +31,6 @@ fun UwbDataView() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-//            Log.e("uwb", "distance $distance angle $azimuth")
             Text(text = "UWB")
             Text(text = "distance: ${distance.toFloat().fixDistanceForScreen()}")
             Text(text = "angle: ${azimuth.toFloat().fixAngleForScreen()}")
