@@ -38,11 +38,8 @@ import com.example.supabasedemo.compose.views.GyroscopeView
 import com.example.supabasedemo.compose.views.RotationView
 import com.example.supabasedemo.compose.views.UwbDataView
 import com.example.supabasedemo.data.model.UserState
-import com.example.supabasedemo.data.network.SupabaseDbHelper
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.example.supabasedemo.ui.theme.MyOutlinedTextField
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlin.random.Random
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -67,7 +64,7 @@ fun UwbScreen(
     val deviceAddress by UwbManagerSingleton.address.collectAsState(initial = "-1")
     val devicePreamble by UwbManagerSingleton.preamble.collectAsState(initial = "-1")
 
-    var kochamGotowacId: Int by remember { mutableIntStateOf(0) }
+    var directionId: Int by remember { mutableIntStateOf(0) }
 
     var permissionGranted by remember { mutableStateOf(false) }
 
@@ -75,7 +72,7 @@ fun UwbScreen(
         if(!isStarted){
             UwbManagerSingleton.initialize(context, isController)
         }
-        kochamGotowacId = Random.nextInt(0, 1000)
+        directionId = Random.nextInt(0, 1000)
 
         permissionGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.UWB_RANGING
@@ -124,10 +121,10 @@ fun UwbScreen(
             )
             Spacer(modifier = Modifier.padding(8.dp))
             MyOutlinedTextField(
-                value = kochamGotowacId.toString(),
+                value = directionId.toString(),
                 onValueChange = {
-                    kochamGotowacId = if(it != "") it.toInt() else 0 },
-                placeholder = { Text(text = "Enter kochamGotowacId Value") },
+                    directionId = if(it != "") it.toInt() else 0 },
+                placeholder = { Text(text = "Enter directionId Value") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
@@ -135,14 +132,14 @@ fun UwbScreen(
         Text(text = "Your Device Address: $deviceAddress")
         if (isController) {
             Text(text = "Your Preamble: $devicePreamble")
-            Text(text = "Your kochamGotowacId: $kochamGotowacId")
+            Text(text = "Your directionId: $directionId")
         }
         Spacer(modifier = Modifier.padding(8.dp))
         if (!isStarted) {
             MyOutlinedButton(onClick = {
                 if (address.isNotBlank()) {
                     if (isController) {
-                        viewModel.supabaseDb.createKochamGotowac(kochamGotowacId)
+                        viewModel.supabaseDb.createDirection(directionId)
                         UwbManagerSingleton.startSession(address, "0")
                     } else {
                         UwbManagerSingleton.startSession(address, preamble)
@@ -177,7 +174,7 @@ fun UwbScreen(
             RotationView(context)
         }
         Spacer(modifier = Modifier.padding(8.dp))
-        ArrowView(viewModel, getKochamGotowac = { return@ArrowView kochamGotowacId})
+        ArrowView(viewModel, getOtherPhoneDirection = { return@ArrowView directionId})
 
         BackHandler {
             setState(UserState.InMainMenu)

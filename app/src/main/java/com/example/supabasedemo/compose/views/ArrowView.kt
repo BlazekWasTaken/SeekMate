@@ -1,6 +1,5 @@
 package com.example.supabasedemo.compose.views
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -17,33 +16,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.supabasedemo.R
 import com.example.supabasedemo.compose.viewModels.MainViewModel
-import com.example.supabasedemo.data.network.KochamGotowac
 import com.example.supabasedemo.data.network.SensorManagerSingleton
 import com.example.supabasedemo.data.network.UwbManagerSingleton
 import com.example.supabasedemo.data.network.getForwardAcceleration
 import com.example.supabasedemo.ui.theme.AppTheme
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 
 @Composable
 fun ArrowView(
     viewModel: MainViewModel,
-    getKochamGotowac: () -> Int
+    getOtherPhoneDirection: () -> Int
 ) {
-    val accelerometers by SensorManagerSingleton.accelerometerReadingsFlow.collectAsState()
     val uwbAngle by UwbManagerSingleton.azimuth.collectAsState()
     val uwbDistance by UwbManagerSingleton.distance.collectAsState()
     val compass by SensorManagerSingleton.compassReadingsFlow.collectAsState()
 
-
     val isFront = if (isOtherPhoneStationary()) {
         var refDirection = 0F
         LaunchedEffect(Unit) {
-            refDirection = otherPhoneDirection(viewModel, getKochamGotowac)
-            Log.e("kochamGotowac", "siemanko direction $refDirection")
+            refDirection = otherPhoneDirection(viewModel, getOtherPhoneDirection)
         }
 
         val distance1 = uwbDistance
@@ -51,9 +44,8 @@ fun ArrowView(
 
         LaunchedEffect(Unit) {
             while (true) {
-                Log.e("kocham", "siemanko async")
                 distance2 = uwbDistance
-                if (UwbManagerSingleton.isController) viewModel.supabaseDb.sendKochamGotowac(getKochamGotowac(), SensorManagerSingleton.compassReadingsFlow.value.last())
+                if (UwbManagerSingleton.isController) viewModel.supabaseDb.sendDirection(getOtherPhoneDirection(), SensorManagerSingleton.compassReadingsFlow.value.last())
                 delay(1000)
             }
         }
@@ -118,6 +110,6 @@ fun isOtherPhoneStationary ():Boolean {
 
 suspend fun otherPhoneDirection (viewModel: MainViewModel, getKochamGotowac: () -> Int):Float {
     var a: Float = 0F
-    viewModel.supabaseRealtime.subscribeToKochamGotowac(getKochamGotowac(), onKochamGotowacUpdate = { a = it.direction})
+    viewModel.supabaseRealtime.subscribeToDirection(getKochamGotowac(), onDirectionUpdate = { a = it.direction})
     return a
 }

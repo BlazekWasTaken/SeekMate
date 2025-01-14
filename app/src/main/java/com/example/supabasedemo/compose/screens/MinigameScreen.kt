@@ -8,7 +8,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -69,6 +68,7 @@ val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
 
 @Composable
 fun MinigameScreen(
+    onNavigateToEndGame: () -> Unit,
     onNavigateToMainMenu: () -> Unit,
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit,
@@ -93,6 +93,13 @@ fun MinigameScreen(
             delay(1000)
             timeLeft--
         }
+
+        if (round == 5) {
+            //TODO: update end time in database
+            setState(UserState.InEndGame)
+            onNavigateToEndGame()
+        }
+        else{
             viewModel.supabaseDb.updateRoundNumber(
                 gameUuid,
                 round + 1,
@@ -102,7 +109,8 @@ fun MinigameScreen(
                 onError = {
                     setState(UserState.InMainMenu)
                 }
-            )
+                )
+            }
     }
 
 
