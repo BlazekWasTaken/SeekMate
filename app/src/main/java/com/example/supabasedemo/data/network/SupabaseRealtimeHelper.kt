@@ -50,33 +50,38 @@ class SupabaseRealtimeHelper(
                 }
             }
 
-            when {
-                updatedGame.round_no == -1 -> {
-                    NavControllerProvider.navController.navigate(route = Demo)
-                }
-                updatedGame.round_no == 0 -> {
-                    Log.e("Supabase-Realtime", "Waiting for players to join...")
-                }
-                updatedGame.round_no % 2 == 1 -> {
-                    if (UwbManagerSingleton.isController) {
-                        NavControllerProvider.navController.navigate(
-                            "minigame/${updatedGame.round_no}/${updatedGame.uuid}/${UwbManagerSingleton.isController}"
-                        )
-                    } else {
-                        NavControllerProvider.navController.navigate(
-                            "waiting/${updatedGame.uuid}/${updatedGame.round_no}/0/${UwbManagerSingleton.isController}"
-                        )
+            if (updatedGame.end_time == null) {
+                when {
+                    updatedGame.round_no == -1 -> {
+                        NavControllerProvider.navController.navigate(route = Demo)
                     }
-                }
-                else -> {
-                    if (UwbManagerSingleton.isController) {
-                        NavControllerProvider.navController.navigate(
-                            "waiting/${updatedGame.uuid}/${updatedGame.round_no}/0/${UwbManagerSingleton.isController}"
-                        )
-                    } else {
-                        NavControllerProvider.navController.navigate(
-                            "minigame/${updatedGame.round_no}/${updatedGame.uuid}/${UwbManagerSingleton.isController}"
-                        )
+
+                    updatedGame.round_no == 0 -> {
+                        Log.e("Supabase-Realtime", "Waiting for players to join...")
+                    }
+
+                    updatedGame.round_no % 2 == 1 -> {
+                        if (UwbManagerSingleton.isController) {
+                            NavControllerProvider.navController.navigate(
+                                "minigame/${updatedGame.round_no}/${updatedGame.uuid}/${UwbManagerSingleton.isController}"
+                            )
+                        } else {
+                            NavControllerProvider.navController.navigate(
+                                "waiting/${updatedGame.uuid}/${updatedGame.round_no}/0/${UwbManagerSingleton.isController}"
+                            )
+                        }
+                    }
+
+                    else -> {
+                        if (UwbManagerSingleton.isController) {
+                            NavControllerProvider.navController.navigate(
+                                "waiting/${updatedGame.uuid}/${updatedGame.round_no}/0/${UwbManagerSingleton.isController}"
+                            )
+                        } else {
+                            NavControllerProvider.navController.navigate(
+                                "minigame/${updatedGame.round_no}/${updatedGame.uuid}/${UwbManagerSingleton.isController}"
+                            )
+                        }
                     }
                 }
             }
@@ -99,7 +104,24 @@ class SupabaseRealtimeHelper(
                 onDirectionUpdate(updateDirection)
 
             }.launchIn(scope)
-            channel.subscribe()
         } catch (_: Exception) {}
+        channel.subscribe()
+    }
+
+    suspend fun subscribeToEndTime (uuid: String, onEndTimeUpdate: (Game) -> Unit) {
+        val channel = client.channel("games"){}
+        try {
+            val endTimeFlow: Flow<Game> = channel.postgresSingleDataFlow(
+                schema = "public",
+                table = "games",
+                primaryKey = Game::uuid
+            ) {
+                eq("uuid", uuid)
+            }
+            endTimeFlow.onEach { updateEndTime ->
+                onEndTimeUpdate(updateEndTime)
+            }.launchIn(scope)
+        } catch (_: Exception) {}
+        channel.subscribe()
     }
 }

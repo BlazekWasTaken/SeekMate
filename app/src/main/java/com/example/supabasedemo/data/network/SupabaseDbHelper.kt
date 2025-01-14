@@ -11,6 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
@@ -82,6 +86,26 @@ class SupabaseDbHelper(
             onSuccess()
         } catch (e: Exception) {
             onError(e.message ?: "Unexpected error.")
+        }
+    }
+
+    fun updateEndTime(
+        gameUuid: String,
+        onError: (String) -> Unit
+    ) = runBlocking {
+        try {
+            client.from("games").update(
+                {
+                    Game::end_time setTo Clock.System.now().toLocalDateTime(timeZone = TimeZone.currentSystemDefault()).toString()
+                }
+            ){
+                select()
+                filter {
+                    Game::uuid eq gameUuid
+                }
+            }
+        } catch (e: Exception){
+            onError(e.message ?: "Something went wrong")
         }
     }
 

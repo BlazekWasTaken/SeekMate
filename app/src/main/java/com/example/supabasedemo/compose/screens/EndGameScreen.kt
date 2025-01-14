@@ -19,17 +19,13 @@ fun EndGameScreen(
     getState: () -> MutableState<UserState>,
     setState: (UserState) -> Unit,
 ) {
-    val userState = getState().value
-
-    if(userState is UserState.InEndGame){
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(text = "This is end game screen")
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "This is end game screen")
     }
 }

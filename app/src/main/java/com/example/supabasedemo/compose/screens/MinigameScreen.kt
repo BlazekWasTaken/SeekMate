@@ -88,6 +88,22 @@ fun MinigameScreen(
     val totalTime = 30
     var timeLeft by remember { mutableIntStateOf(totalTime) }
 
+    var endTimeSubscription by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.supabaseRealtime.subscribeToEndTime(
+            uuid = gameUuid,
+            onEndTimeUpdate = { updateEndTime ->
+                endTimeSubscription = updateEndTime.end_time
+            }
+        )
+    }
+
+    if (endTimeSubscription != null) {
+        setState(UserState.InEndGame)
+        onNavigateToEndGame()
+    }
+
     LaunchedEffect(Unit) {
         while (timeLeft > 0) {
             delay(1000)
@@ -95,7 +111,12 @@ fun MinigameScreen(
         }
 
         if (round == 5) {
-            //TODO: update end time in database
+            viewModel.supabaseDb.updateEndTime(
+                gameUuid,
+                onError = {
+                    Log.e("a", "Something went wrong")
+                }
+            )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
         }
@@ -191,13 +212,6 @@ fun MinigameScreen(
                 fontSize = 24.sp,
                 modifier = Modifier.padding(8.dp)
             )
-//            Text(
-//                text = "Click only green circles for +1 points.\n" +
-//                        "If you click something else, you get -1 points.\n" +
-//                        "If you move, you get -1 points for every second of movement.",
-//                fontSize = 24.sp,
-//                modifier = Modifier.padding(8.dp)
-//            )
 
             BoxWithConstraints(
                 modifier = Modifier

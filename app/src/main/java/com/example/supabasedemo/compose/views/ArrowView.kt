@@ -27,7 +27,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun ArrowView(
     viewModel: MainViewModel,
-    getOtherPhoneDirection: () -> Int
+    getId: () -> Int
 ) {
     val uwbAngle by UwbManagerSingleton.azimuth.collectAsState()
     val uwbDistance by UwbManagerSingleton.distance.collectAsState()
@@ -36,7 +36,7 @@ fun ArrowView(
     val isFront = if (isOtherPhoneStationary()) {
         var refDirection = 0F
         LaunchedEffect(Unit) {
-            refDirection = otherPhoneDirection(viewModel, getOtherPhoneDirection)
+            refDirection = otherPhoneDirection(viewModel, getId)
         }
 
         val distance1 = uwbDistance
@@ -45,7 +45,7 @@ fun ArrowView(
         LaunchedEffect(Unit) {
             while (true) {
                 distance2 = uwbDistance
-                if (UwbManagerSingleton.isController) viewModel.supabaseDb.sendDirection(getOtherPhoneDirection(), SensorManagerSingleton.compassReadingsFlow.value.last())
+                if (UwbManagerSingleton.isController) viewModel.supabaseDb.sendDirection(getId(), SensorManagerSingleton.compassReadingsFlow.value.last())
                 delay(1000)
             }
         }

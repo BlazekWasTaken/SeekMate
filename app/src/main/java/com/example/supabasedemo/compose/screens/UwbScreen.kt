@@ -174,7 +174,7 @@ fun UwbScreen(
             RotationView(context)
         }
         Spacer(modifier = Modifier.padding(8.dp))
-        ArrowView(viewModel, getOtherPhoneDirection = { return@ArrowView directionId})
+        ArrowView(viewModel, getId = { return@ArrowView directionId})
 
         BackHandler {
             setState(UserState.InMainMenu)

@@ -1,5 +1,6 @@
 package com.example.supabasedemo.compose.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,8 +39,11 @@ import okhttp3.internal.wait
 
 @Composable
 fun WaitingScreen(
+    onNavigateToEndGame: () -> Unit,
     getState: () -> MutableState<UserState>,
     setState: (UserState) -> Unit,
+    getEndTime: () -> Int,
+    gameUuid: String,
     viewModel: MainViewModel
 ) {
     val uwbDistance by UwbManagerSingleton.distanceReadingsFlow.collectAsState()
@@ -51,7 +55,19 @@ fun WaitingScreen(
     var isHintVisible: Boolean by remember { mutableStateOf(false) }
     var wait: Boolean by remember { mutableStateOf(false) }
 
+    var endTimeSubscription by remember { mutableStateOf<String?>(null) }
+
     if (userState !is UserState.InWaitingScreen) return
+
+    //TODO: check if there is end time in the database
+    LaunchedEffect(Unit) {
+        viewModel.supabaseRealtime.subscribeToEndTime(
+            uuid = gameUuid,
+            onEndTimeUpdate = { updateEndTime ->
+                endTimeSubscription = updateEndTime.end_time
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -95,15 +111,24 @@ fun WaitingScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,) {
             if(isHintVisible) {
-                ArrowView(viewModel, getOtherPhoneDirection = { return@ArrowView directionId })
+                ArrowView(viewModel, getId = { return@ArrowView directionId })
                 Spacer(modifier = Modifier.padding(10.dp, 0.dp))
                 UwbDataView()
             }
         }
     }
-    if (uwbDistance.takeLast(10).count {it < 1} == 10) {
+    if (uwbDistance.takeLast(10).count {it < 1} == 10 && (userState.round%2 == 0)) {
+        viewModel.supabaseDb.updateEndTime(
+            gameUuid,
+            onError = {
+                Log.e("a", "Something went wrong")
+            }
+        )
         setState(UserState.InEndGame)
+        onNavigateToEndGame()
     }
-
-    //TODO: check if there is end time in the database
+    if (endTimeSubscription != null) {
+        setState(UserState.InEndGame)
+        onNavigateToEndGame()
+    }
 }

@@ -129,8 +129,13 @@ class MainActivity : ComponentActivity() {
                     backStackEntry.arguments?.getBoolean("isController") ?: false,))
 
                 WaitingScreen(
+                    onNavigateToEndGame = {
+                        navController.navigate(EndGame)
+                    },
                     getState = { _userState },
                     setState = { setState(it) },
+                    getEndTime = { 0 },
+                    gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: "",
                     viewModel = viewModel
                 )
             }
@@ -140,7 +145,7 @@ class MainActivity : ComponentActivity() {
                 arguments = listOf(
                     navArgument("gameUuid") { type = NavType.StringType },
                 )
-            ) { backStackEntry ->
+            ) { _ ->
                 EndGameScreen(
                     getState = { _userState },
                     setState = { setState(it) }
