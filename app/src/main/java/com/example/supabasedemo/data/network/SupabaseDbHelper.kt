@@ -17,6 +17,29 @@ import kotlin.random.Random
 class SupabaseDbHelper(
     val setState: (UserState) -> Unit,
 ) {
+    fun updateRoundNumber(
+        gameUuid: String,
+        newRound: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) = runBlocking {
+        try {
+            client.from("games").update(
+                {
+                    Game::round_no setTo newRound
+                }
+            ) {
+                select()
+                filter {
+                    Game::uuid eq gameUuid
+                }
+            }
+            onSuccess()
+        } catch (e: Exception) {
+            onError(e.message ?: "Unexpected error.")
+        }
+    }
+
     fun joinGameInSupabase(
         gameUuid: String,
         onGameJoined: (Game) -> Unit,
