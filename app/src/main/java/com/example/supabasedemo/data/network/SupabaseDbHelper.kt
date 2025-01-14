@@ -5,6 +5,7 @@ import com.example.supabasedemo.data.model.Game
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.data.network.SupabaseClient.client
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,6 +18,51 @@ import kotlin.random.Random
 class SupabaseDbHelper(
     val setState: (UserState) -> Unit,
 ) {
+    fun getFinishedUser1Games(
+        currentUser: JsonObject?,
+        onError: (String) -> Unit
+    ): List<Game> {
+        val user1 = currentUser?.get("sub").toString().trim().replace("\"", "")
+        var games: List<Game> = ArrayList(0)
+        runBlocking {
+            try {
+                games = client.from("games").select {
+                    filter {
+                        Game::user1 eq user1
+                        filterNot("end_time", FilterOperator.IS, "NULL")
+                    }
+                }.decodeList<Game>()
+            } catch (e: Exception) {
+                Log.e("supabase", e.message!!)
+                onError(e.message ?: "Unexpected error occurred.")
+            }
+        }
+        return games
+    }
+
+    fun getFinishedUser2Games(
+        currentUser: JsonObject?,
+        onError: (String) -> Unit
+    ): List<Game> {
+        val user2 = currentUser?.get("sub").toString().trim().replace("\"", "")
+        var games: List<Game> = ArrayList(0)
+        runBlocking {
+            try {
+                games = client.from("games").select {
+                    filter {
+                        Game::user2 eq user2
+//                        exact("end_time", null)
+                        filterNot("end_time", FilterOperator.IS, "NULL")
+                    }
+                }.decodeList<Game>()
+            } catch (e: Exception) {
+                Log.e("supabase", e.message!!)
+                onError(e.message ?: "Unexpected error occurred.")
+            }
+        }
+        return games
+    }
+
     fun updateRoundNumber(
         gameUuid: String,
         newRound: Int,
@@ -105,34 +151,6 @@ class SupabaseDbHelper(
         return gameData
     }
 
-    fun sendReadingToDb(
-        distance: Double,
-        angle: Double,
-        stDev: Double,
-        accelerometer: List<Reading>,
-        gyroscope: List<Reading>,
-        isFront: Boolean
-    ) {
-        CoroutineScope(Dispatchers.Main.immediate).launch {
-            try{
-                client.from("ml_test").insert(TestData(
-                    distance = distance,
-                    angle = angle,
-                    st_dev = stDev,
-                    acc_x = accelerometer.map { it.x.toDouble() }.toDoubleArray(),
-                    acc_y = accelerometer.map { it.y.toDouble() }.toDoubleArray(),
-                    acc_z = accelerometer.map { it.z.toDouble() }.toDoubleArray(),
-                    gyr_x = gyroscope.map { it.x.toDouble() }.toDoubleArray(),
-                    gyr_y = gyroscope.map { it.y.toDouble() }.toDoubleArray(),
-                    gyr_z = gyroscope.map { it.z.toDouble() }.toDoubleArray(),
-                    is_front = isFront
-                ))
-            } catch (_: Exception) {
-
-            }
-        }
-    }
-
     fun createKochamGotowac (a: Int) {
         val b = KochamGotowac(a, 0F)
         runBlocking {
@@ -161,23 +179,6 @@ class SupabaseDbHelper(
         }
     }
 }
-
-@Serializable
-class TestData(
-    val distance: Double,
-    val angle: Double,
-    val st_dev: Double,
-    val acc_x: DoubleArray,
-    val acc_y: DoubleArray,
-    val acc_z: DoubleArray,
-    val gyr_x: DoubleArray,
-    val gyr_y: DoubleArray,
-    val gyr_z: DoubleArray,
-//    val com_x: DoubleArray,
-//    val com_y: DoubleArray,
-//    val com_z: DoubleArray,
-    val is_front: Boolean
-)
 
 @Serializable
 class KochamGotowac (

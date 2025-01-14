@@ -232,7 +232,8 @@ class MainActivity : ComponentActivity() {
                         },
                         setState = {
                             setState(it)
-                        }
+                        },
+                        viewModel
                     )
                 }
                 composable<Tutorial> {

@@ -170,8 +170,8 @@ fun CreateGameScreen(
                     Text("User 1: ${gameDetails!!.user1}")
                     Text("User 2: ${gameDetails!!.user2 ?: "Waiting for player"}")
                     Text("Round: ${gameDetails!!.round_no}")
-                    Text("Start Time: ${gameDetails!!.startTime ?: "Not started yet"}")
-                    Text("End Time: ${gameDetails!!.endTime ?: "Not ended yet"}")
+                    Text("Start Time: ${gameDetails!!.start_time ?: "Not started yet"}")
+                    Text("End Time: ${gameDetails!!.end_time ?: "Not ended yet"}")
                     Text("Winner: ${gameDetails!!.won?.let { if (it) "User 1" else "User 2" } ?: "TBD"}")
                 }
             }

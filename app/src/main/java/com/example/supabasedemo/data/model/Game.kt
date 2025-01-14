@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 data class Game(
     val id: Long? = null,
     val uuid: String,
-    val startTime: String? = null,
-    val endTime: String? = null,
+    val start_time: String? = null,
+    val end_time: String? = null,
     val round_no: Int = -1,
     val user1: String?,
     val user2: String? = null,
