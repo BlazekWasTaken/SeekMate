@@ -36,6 +36,7 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.floor
 
 var games1: List<Game> = ArrayList(0)
 var games2: List<Game> = ArrayList(0)
@@ -65,13 +66,11 @@ fun StatsScreen(
                 UserState.InMainMenu
             )
         }
-//        }.filter { it.endTime != null }
         games2 = viewModel.supabaseDb.getFinishedUser2Games(viewModel.supabaseAuth.getCurrentUser()) {
             setState(
                 UserState.InMainMenu
             )
         }
-//        }.filter { it.endTime != null }
         gamesWon = games1.count { it.won == true } + games2.count { it.won == false }
         gamesLost = games1.count { it.won == false } + games2.count { it.won == true }
 
@@ -100,18 +99,42 @@ fun StatsScreen(
         Text(textAlign = TextAlign.Center, text = "Games won: $gamesWon")
         Spacer(modifier = Modifier.padding(8.dp))
         Text(textAlign = TextAlign.Center, text = "Games lost: $gamesLost")
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(textAlign = TextAlign.Center, text = "Won after an average of rounds: $avgRoundWon")
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(textAlign = TextAlign.Center, text = "Lost after an average of rounds: $avgRoundLost")
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(textAlign = TextAlign.Center, text = "Won as seeker after an average of: $avgTimeWonAsSeeker seconds")
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(textAlign = TextAlign.Center, text = "Lost as seeker after an average of: $avgTimeLostAsSeeker seconds")
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(textAlign = TextAlign.Center, text = "Won as hider after an average of: $avgTimeWonAsHider seconds")
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(textAlign = TextAlign.Center, text = "Lost as hider after an average of: $avgTimeLostAsHider seconds")
+        if (avgRoundWon == 0.0) {
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = "Won after an average of rounds: $avgRoundWon")
+        }
+        if (avgRoundLost == 0.0) {
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = "Lost after an average of rounds: $avgRoundLost")
+        }
+        if (avgTimeWonAsSeeker == 0.0) {
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = "Won as seeker after an average of: ${(avgTimeWonAsSeeker/60).toInt()}:${if (floor(avgTimeWonAsSeeker%60) < 10) "0" else ""}${floor(avgTimeWonAsSeeker%60).toInt()}")
+        }
+        if (avgTimeLostAsSeeker == 0.0) {
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = "Lost as seeker after an average of: ${(avgTimeLostAsSeeker/60).toInt()}:${if (floor(avgTimeLostAsSeeker%60) < 10) "0" else ""}${floor(avgTimeLostAsSeeker%60).toInt()}")
+        }
+        if (avgTimeWonAsHider == 0.0) {
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = "Won as hider after an average of: ${floor(avgTimeWonAsHider/60).toInt()}:${if (floor(avgTimeWonAsHider%60) < 10) "0" else ""}${floor(avgTimeWonAsHider%60).toInt()}")
+        }
+        if (avgTimeWonAsSeeker == 0.0) {
+            Spacer(modifier = Modifier.padding(8.dp))
+            Text(
+                textAlign = TextAlign.Center,
+                text = "Lost as hider after an average of: ${(avgTimeWonAsSeeker/60).toInt()}:${if (floor(avgTimeWonAsSeeker%60) < 10) "0" else ""}${floor(avgTimeWonAsSeeker%60).toInt()}")
+        }
         Spacer(modifier = Modifier.padding(8.dp))
         MyOutlinedButton(
             onClick = {
