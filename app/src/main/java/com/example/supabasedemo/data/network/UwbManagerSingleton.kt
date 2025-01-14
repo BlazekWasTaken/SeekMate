@@ -1,6 +1,5 @@
 package com.example.supabasedemo.data.network
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.core.uwb.RangingParameters
@@ -13,7 +12,6 @@ import androidx.core.uwb.UwbComplexChannel
 import androidx.core.uwb.UwbControllerSessionScope
 import androidx.core.uwb.UwbDevice
 import androidx.core.uwb.UwbManager
-import com.example.supabasedemo.utils.TfLiteModel
 import com.google.common.primitives.Shorts
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -52,15 +50,11 @@ object UwbManagerSingleton {
 
     private var initializationDeferred: CompletableDeferred<Unit>? = null
 
-    @SuppressLint("StaticFieldLeak")
-    private var model: TfLiteModel? = null
-
     fun initialize(context: Context, isController: Boolean) {
         stopSession()
         UwbManagerSingleton.isController = isController
         uwbManager = UwbManager.createInstance(context)
         initializationDeferred = CompletableDeferred()
-        model = TfLiteModel(context)
 
         // TODO mv it to separate dispatchable job
         CoroutineScope(Dispatchers.Main).launch {
