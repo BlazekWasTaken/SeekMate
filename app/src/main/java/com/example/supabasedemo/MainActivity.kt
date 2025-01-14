@@ -237,7 +237,11 @@ class MainActivity : ComponentActivity() {
                             navController.navigate(route = MiniGame)
                         },
                         onNavigateToEndGame = {
-                            navController.navigate(route = EndGame)
+                            navController.navigate(route = EndGame){
+                                popUpTo(EndGame) {
+                                    inclusive = true
+                                }
+                            }
                         },
                         getState = {
                             return@MainMenuScreen _userState
@@ -303,21 +307,21 @@ class MainActivity : ComponentActivity() {
                         viewModel = viewModel
                     )
                 }
-                composable("minigame") {
-                    MinigameScreen(
-                        onNavigateToEndGame = {
-                            navController.navigate(EndGame)
-                        },
-                        onNavigateToMainMenu = {
-                            navController.popBackStack()
-                        },
-                        getState = { _userState },
-                        setState = { setState(it) },
-                        round = -1,
-                        gameUuid = "uuid",
-                        viewModel = viewModel,
-                    )
-                }
+//                composable("minigame") {
+//                    MinigameScreen(
+//                        onNavigateToEndGame = {
+//                            navController.navigate(EndGame)
+//                        },
+//                        onNavigateToMainMenu = {
+//                            navController.popBackStack()
+//                        },
+//                        getState = { _userState },
+//                        setState = { setState(it) },
+//                        round = -1,
+//                        gameUuid = "uuid",
+//                        viewModel = viewModel,
+//                    )
+//                }
             }
             navigation<Settings>(startDestination = SettingsMenu) {
                 composable<SettingsMenu> {

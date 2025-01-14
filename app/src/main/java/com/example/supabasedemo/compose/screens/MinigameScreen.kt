@@ -100,8 +100,10 @@ fun MinigameScreen(
     }
 
     if (endTimeSubscription != null) {
-        setState(UserState.InEndGame)
-        onNavigateToEndGame()
+        LaunchedEffect(Unit) {
+            setState(UserState.InEndGame)
+            onNavigateToEndGame()
+        }
     }
 
     LaunchedEffect(Unit) {

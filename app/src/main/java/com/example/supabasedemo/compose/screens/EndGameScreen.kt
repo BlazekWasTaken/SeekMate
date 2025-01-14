@@ -26,6 +26,6 @@ fun EndGameScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "This is end game screen")
+        Text(text = "Game ended")
     }
 }

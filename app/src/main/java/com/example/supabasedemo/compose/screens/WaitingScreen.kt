@@ -124,11 +124,15 @@ fun WaitingScreen(
                 Log.e("a", "Something went wrong")
             }
         )
-        setState(UserState.InEndGame)
-        onNavigateToEndGame()
+        LaunchedEffect(Unit) {
+            setState(UserState.InEndGame)
+            onNavigateToEndGame()
+        }
     }
     if (endTimeSubscription != null) {
-        setState(UserState.InEndGame)
-        onNavigateToEndGame()
+        LaunchedEffect(Unit) {
+            setState(UserState.InEndGame)
+            onNavigateToEndGame()
+        }
     }
 }
