@@ -173,6 +173,7 @@ class SupabaseDbHelper(
                         {
                             Game::user2 setTo user2Uuid
                             Game::controlee_address setTo controleeAddress
+                            Game::round_no setTo 1
                         }
                     ) {
                         select()

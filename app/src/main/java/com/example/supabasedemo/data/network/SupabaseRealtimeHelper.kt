@@ -28,6 +28,7 @@ class SupabaseRealtimeHelper(
             schema = "public",
             table = "games",
             primaryKey = Game::uuid
+
         ) {
             eq("uuid", uuid)
         }
@@ -36,7 +37,7 @@ class SupabaseRealtimeHelper(
             onGameUpdate(updatedGame)
             Log.e("Supabase-Realtime", "Game updated: $updatedGame")
 
-            if (updatedGame.user1 != null && updatedGame.user2 != null && updatedGame.round_no == 0) {
+            if (updatedGame.user1 != null && updatedGame.user2 != null && updatedGame.round_no == 1) {
                 Log.e("a", "aaaaaaaaaaaaaa")
                 if (UwbManagerSingleton.isController) {
                     UwbManagerSingleton.startSession(
