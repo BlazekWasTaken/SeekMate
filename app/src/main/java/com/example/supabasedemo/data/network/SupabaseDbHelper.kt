@@ -5,6 +5,7 @@ import com.example.supabasedemo.data.model.Game
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.data.network.SupabaseClient.client
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,32 @@ class SupabaseDbHelper(
         return games
     }
 
+    fun getLastFinishedUserGame(
+        currentUser: JsonObject?,
+        onError: (String) -> Unit
+    ): Game {
+        val user = currentUser?.get("sub").toString().trim().replace("\"", "")
+        lateinit var game: Game
+        runBlocking {
+            try {
+                game = client.from("games").select {
+                    filter {
+                        or {
+                            Game::user1 eq user
+                            Game::user2 eq user
+                        }
+                        filterNot("end_time", FilterOperator.IS, "NULL")
+                    }
+                    order(column = "end_time", order = Order.DESCENDING)
+                }.decodeSingle()
+            } catch (e: Exception) {
+                Log.e("supabase", e.message!!)
+                onError(e.message ?: "Unexpected error occurred.")
+            }
+        }
+        return game
+    }
+
     fun updateRoundNumber(
         gameUuid: String,
         newRound: Int,
@@ -105,6 +132,27 @@ class SupabaseDbHelper(
                 }
             }
         } catch (e: Exception){
+            onError(e.message ?: "Something went wrong")
+        }
+    }
+
+    fun updateWinner(
+        gameUuid: String,
+        didUser1Win: Boolean,
+        onError: (String) -> Unit
+    ) = runBlocking {
+        try{
+            client.from("games").update(
+                {
+                    Game::won setTo didUser1Win
+                }
+            ){
+                select()
+                filter {
+                    Game::uuid eq gameUuid
+                }
+            }
+        } catch (e: Exception) {
             onError(e.message ?: "Something went wrong")
         }
     }

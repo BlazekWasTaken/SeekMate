@@ -59,7 +59,6 @@ fun WaitingScreen(
 
     if (userState !is UserState.InWaitingScreen) return
 
-    //TODO: check if there is end time in the database
     LaunchedEffect(Unit) {
         viewModel.supabaseRealtime.subscribeToEndTime(
             uuid = gameUuid,
@@ -124,13 +123,29 @@ fun WaitingScreen(
                 Log.e("a", "Something went wrong")
             }
         )
+        // TODO: this user won
         LaunchedEffect(Unit) {
+            viewModel.supabaseDb.updateWinner(
+                gameUuid,
+                didUser1Win = true,
+                onError = {
+                    Log.e("a", "Something went wrong")
+                }
+            )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
         }
     }
     if (endTimeSubscription != null) {
+        // TODO: This user lost
         LaunchedEffect(Unit) {
+            viewModel.supabaseDb.updateWinner(
+                gameUuid,
+                didUser1Win = !UwbManagerSingleton.isController,
+                onError = {
+                    Log.e("a", "Something went wrong")
+                }
+            )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
         }

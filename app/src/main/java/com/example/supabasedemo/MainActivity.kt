@@ -51,7 +51,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val MINIGAME_ROUTE = "minigame/{round}/{gameUuid}/{isController}"
         const val WAITING_ROUTE = "waiting/{gameUuid}/{round}/{score}/{isController}"
-        const val ENDGAME_ROUTE = "endgame/{gameUuid}"
     }
     private val permissionRequestCode = 101
 
@@ -137,18 +136,6 @@ class MainActivity : ComponentActivity() {
                     getEndTime = { 0 },
                     gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: "",
                     viewModel = viewModel
-                )
-            }
-
-            composable(
-                route = ENDGAME_ROUTE,
-                arguments = listOf(
-                    navArgument("gameUuid") { type = NavType.StringType },
-                )
-            ) { _ ->
-                EndGameScreen(
-                    getState = { _userState },
-                    setState = { setState(it) }
                 )
             }
 
@@ -283,9 +270,31 @@ class MainActivity : ComponentActivity() {
                         getState = {
                             return@EndGameScreen _userState
                         },
+                        onNavigateToStats = {
+                            navController.navigate(Stats){
+                                popUpTo(Stats) {
+                                    inclusive = false
+                                }
+                            }
+                        },
+                        onNavigateToMainMenu = {
+                            navController.navigate(MainMenu){
+                                popUpTo(MainMenu) {
+                                    inclusive = false
+                                }
+                            }
+                        },
                         setState = {
                             setState(it)
-                        }
+                        },
+                        getGame = {
+                            viewModel.supabaseDb.getLastFinishedUserGame(viewModel.supabaseAuth.getCurrentUser()) {
+                                setState(
+                                    UserState.InMainMenu
+                                )
+                            }
+                        },
+                        viewModel = viewModel
                     )
                 }
                 composable<MiniGame> {

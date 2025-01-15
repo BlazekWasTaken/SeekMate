@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
+import com.example.supabasedemo.data.network.UwbManagerSingleton
 import com.example.supabasedemo.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -91,30 +92,22 @@ fun MinigameScreen(
     var endTimeSubscription by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.supabaseRealtime.subscribeToEndTime(
-            uuid = gameUuid,
-            onEndTimeUpdate = { updateEndTime ->
-                endTimeSubscription = updateEndTime.end_time
-            }
-        )
-    }
-
-    if (endTimeSubscription != null) {
-        LaunchedEffect(Unit) {
-            setState(UserState.InEndGame)
-            onNavigateToEndGame()
-        }
-    }
-
-    LaunchedEffect(Unit) {
         while (timeLeft > 0) {
             delay(1000)
             timeLeft--
         }
 
-        if (round == 5) {
+        if (round == 6) {
             viewModel.supabaseDb.updateEndTime(
                 gameUuid,
+                onError = {
+                    Log.e("a", "Something went wrong")
+                }
+            )
+            //TODO: this user won
+            viewModel.supabaseDb.updateWinner(
+                gameUuid,
+                didUser1Win = false,
                 onError = {
                     Log.e("a", "Something went wrong")
                 }
@@ -134,6 +127,30 @@ fun MinigameScreen(
                 }
                 )
             }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.supabaseRealtime.subscribeToEndTime(
+            uuid = gameUuid,
+            onEndTimeUpdate = { updateEndTime ->
+                endTimeSubscription = updateEndTime.end_time
+            }
+        )
+    }
+
+    //TODO: this user lost
+    if (endTimeSubscription != null) {
+        LaunchedEffect(Unit) {
+            viewModel.supabaseDb.updateWinner(
+                gameUuid,
+                didUser1Win = !UwbManagerSingleton.isController,
+                onError = {
+                    Log.e("a", "Something went wrong")
+                }
+            )
+            setState(UserState.InEndGame)
+            onNavigateToEndGame()
+        }
     }
 
 
