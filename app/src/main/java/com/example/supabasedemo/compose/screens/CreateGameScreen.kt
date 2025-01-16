@@ -2,6 +2,7 @@ package com.example.supabasedemo.compose.screens
 
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,8 +41,14 @@ import java.util.UUID
 @Composable
 fun CreateGameScreen(
     getState: () -> MutableState<UserState>,
+    onNavigateToMainMenu: () -> Unit,
     setState: (state: UserState) -> Unit
 ) {
+    BackHandler {
+        setState(UserState.InMainMenu)
+        onNavigateToMainMenu()
+    }
+
     val context = LocalContext.current
     val viewModel = MainViewModel(context, setState = { setState(it) })
 

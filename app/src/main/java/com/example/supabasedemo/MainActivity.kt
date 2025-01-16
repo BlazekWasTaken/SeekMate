@@ -209,7 +209,6 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(END_GAME_ROUTE) {
                     EndGameScreen(
-                        getState = { _userState },
                         onNavigateToStats = {
                             navController.navigate(STATS_ROUTE) {
                                 popUpTo(STATS_ROUTE) { inclusive = false }
@@ -283,6 +282,13 @@ class MainActivity : ComponentActivity() {
                 composable(GAME_START_ROUTE) {
                     CreateGameScreen(
                         getState = { _userState },
+                        onNavigateToMainMenu = {
+                            navController.navigate(MAIN_MENU_FLOW_ROUTE) {
+                                popUpTo(MAIN_MENU_FLOW_ROUTE) {
+                                    inclusive = true
+                                }
+                            }
+                        },
                         setState = { setState(it) }
                     )
                 }
