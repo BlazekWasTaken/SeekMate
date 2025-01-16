@@ -1,6 +1,7 @@
 package com.example.supabasedemo.compose.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,8 +31,7 @@ fun MainMenuScreen(
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ) {
-    val activity = LocalContext.current as? android.app.Activity
-
+    val activity = LocalActivity.current
     BackHandler {
         activity?.moveTaskToBack(true)
     }

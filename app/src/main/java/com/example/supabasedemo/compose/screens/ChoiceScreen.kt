@@ -1,7 +1,7 @@
 package com.example.supabasedemo.compose.screens
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
-import kotlinx.coroutines.runBlocking
 
 @Composable
 fun ChoiceScreen(
@@ -36,7 +35,7 @@ fun ChoiceScreen(
 
     var shouldCompose by remember { mutableStateOf(false) }
 
-    val activity = LocalContext.current as? android.app.Activity
+    val activity = LocalActivity.current
 
     BackHandler {
         activity?.moveTaskToBack(true)
@@ -52,7 +51,6 @@ fun ChoiceScreen(
         is UserState.CheckedLoginStatusSucceeded -> {
             if (state.message == "User already logged in!") {
                 shouldCompose = false
-                Toast.makeText(LocalContext.current, "You are already logged in", Toast.LENGTH_SHORT)
                 LaunchedEffect(Unit) {
                     onNavigateToMainMenu()
                 }

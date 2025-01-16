@@ -9,6 +9,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -28,9 +29,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,7 +77,7 @@ fun MinigameScreen(
     gameUuid: String,
     viewModel: MainViewModel
 ) {
-    val activity = LocalContext.current as? android.app.Activity
+    val activity = LocalActivity.current
 
     BackHandler {
         activity?.moveTaskToBack(true)
@@ -87,7 +88,7 @@ fun MinigameScreen(
     }
 
     var isMoving by remember { mutableStateOf(false) }
-    var latestSensorRead by remember { mutableStateOf(System.currentTimeMillis()) }
+    var latestSensorRead by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     val context = LocalContext.current
 

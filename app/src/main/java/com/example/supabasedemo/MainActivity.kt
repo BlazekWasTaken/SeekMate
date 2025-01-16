@@ -197,7 +197,6 @@ class MainActivity : ComponentActivity() {
                 composable(STATS_ROUTE) {
                     StatsScreen(
                         onNavigateToMainMenu = { navController.popBackStack() },
-                        getState = { _userState },
                         setState = { setState(it) },
                         viewModel
                     )
