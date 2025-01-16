@@ -110,7 +110,7 @@ fun WaitingScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,) {
             if(isHintVisible) {
-                ArrowView(viewModel, getId = { return@ArrowView directionId })
+                ArrowView()
                 Spacer(modifier = Modifier.padding(10.dp, 0.dp))
                 UwbDataView()
             }
