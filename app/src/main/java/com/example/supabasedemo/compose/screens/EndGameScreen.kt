@@ -29,7 +29,6 @@ import com.example.supabasedemo.ui.theme.MyOutlinedButton
 
 @Composable
 fun EndGameScreen(
-    getState: () -> MutableState<UserState>,
     setState: (UserState) -> Unit,
     onNavigateToMainMenu: () -> Unit,
     getGame: () -> Game,
@@ -61,6 +60,7 @@ fun EndGameScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InStats)
+                onNavigateToStats()
             }) {
             Text(text = "See stats")
         }
@@ -68,27 +68,14 @@ fun EndGameScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InMainMenu)
+                onNavigateToMainMenu()
             }) {
             Text(text = "Back to Main Menu")
         }
 
         BackHandler {
             setState(UserState.InMainMenu)
-        }
-
-        val userState = getState().value
-        when (userState) {
-            is UserState.InMainMenu -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToMainMenu()
-                }
-            }
-            is UserState.InAccountInfo -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToStats()
-                }
-            }
-            else -> {}
+            onNavigateToMainMenu()
         }
     }
 }

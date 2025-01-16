@@ -10,7 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -39,24 +38,51 @@ import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.AppTheme
 import com.example.supabasedemo.ui.theme.ThemeChoice
-import kotlinx.serialization.Serializable
 
-// The NavControllerProvider is singleton object that acts as a global holder for the NavController instance.
 object NavControllerProvider {
     @SuppressLint("StaticFieldLeak")
     lateinit var navController: NavController
 }
 
 class MainActivity : ComponentActivity() {
+
     companion object {
+        // Subflow (parent) routes:
+        const val ROOT_ROUTE = "root"
+        const val LOGIN_FLOW_ROUTE = "loginFlow"
+        const val MAIN_MENU_FLOW_ROUTE = "mainMenuFlow"
+        const val SETTINGS_FLOW_ROUTE = "settingsFlow"
+        const val GAME_FLOW_ROUTE = "gameFlow"
+
+        // Auth child routes:
+        const val LOGIN_CHOICE_ROUTE = "loginChoice"
+        const val LOGIN_ROUTE = "login"
+        const val SIGNUP_ROUTE = "signup"
+
+        // Main menu child routes:
+        const val MENU_ROUTE = "menu"
+        const val STATS_ROUTE = "stats"
+        const val TUTORIAL_ROUTE = "tutorial"
+        const val MINI_GAME_ROUTE_STATIC = "minigameStatic"
+        const val END_GAME_ROUTE = "endGame"
+
+        // Settings child routes:
+        const val SETTINGS_MENU_ROUTE = "settingsMenu"
+        const val ACCOUNT_INFO_ROUTE = "accountInfo"
+        const val THEME_ROUTE = "theme"
+        const val DEMO_ROUTE = "demo"
+
+        // Game child routes:
+        const val GAME_START_ROUTE = "gameStart"
+
+        // Shared composables that need parameters:
         const val MINIGAME_ROUTE = "minigame/{round}/{gameUuid}/{isController}"
         const val WAITING_ROUTE = "waiting/{gameUuid}/{round}/{score}/{isController}"
     }
-    private val permissionRequestCode = 101
 
+    private val permissionRequestCode = 101
     private val _userState = mutableStateOf<UserState>(UserState.InLoginChoice)
     private val _theme = mutableStateOf<ThemeChoice>(ThemeChoice.System)
-
     private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,14 +90,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Instantiate your view model
         viewModel = MainViewModel(this, ::setState)
 
         setContent {
-            AppTheme(
-                getThemeChoice = {
-                    return@AppTheme _theme.value
-                }
-            ) {
+            AppTheme(getThemeChoice = { _theme.value }) {
                 Surface {
                     Navigation()
                 }
@@ -79,14 +102,199 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Top-level NavHost using a ROOT_ROUTE as the single startDestination;
+     * each subflow is defined inside as a separate navigation() block.
+     */
     @Composable
     private fun Navigation() {
         val navController = rememberNavController()
         NavControllerProvider.navController = navController
+
         NavHost(
             navController = navController,
-            startDestination = LoginProcess
+            startDestination = LOGIN_FLOW_ROUTE, // start in the login flow
+            route = ROOT_ROUTE
         ) {
+            // ---------- LOGIN FLOW ----------
+            navigation(
+                route = LOGIN_FLOW_ROUTE,
+                startDestination = LOGIN_CHOICE_ROUTE
+            ) {
+                // "Choice" screen
+                composable(LOGIN_CHOICE_ROUTE) {
+                    ChoiceScreen(
+                        onNavigateToLogIn = {
+                            navController.navigate(LOGIN_ROUTE)
+                        },
+                        onNavigateToSignUp = {
+                            navController.navigate(SIGNUP_ROUTE)
+                        },
+                        // Navigate to the main menu flow route if login is skipped
+                        onNavigateToMainMenu = {
+                            navController.navigate(MAIN_MENU_FLOW_ROUTE) {
+                                popUpTo(LOGIN_FLOW_ROUTE) { inclusive = true }
+                            }
+                        },
+                        getState = { _userState },
+                        setState = { setState(it) }
+                    )
+                }
+                // "Login" screen
+                composable(LOGIN_ROUTE) {
+                    LoginScreen(
+                        onNavigateToMainMenu = {
+                            navController.navigate(MAIN_MENU_FLOW_ROUTE) {
+                                popUpTo(LOGIN_FLOW_ROUTE) { inclusive = true }
+                            }
+                        },
+                        onNavigateToLoginChoice = { navController.popBackStack() },
+                        getState = { _userState },
+                        setState = { setState(it) }
+                    )
+                }
+                // "Signup" screen
+                composable(SIGNUP_ROUTE) {
+                    SignupScreen(
+                        onNavigateToLoginChoice = { navController.popBackStack() },
+                        getState = { _userState },
+                        setState = { setState(it) }
+                    )
+                }
+            }
+
+            // ---------- MAIN MENU FLOW ----------
+            navigation(
+                route = MAIN_MENU_FLOW_ROUTE,
+                startDestination = MENU_ROUTE
+            ) {
+                composable(MENU_ROUTE) {
+                    MainMenuScreen(
+                        // If user logs out, go back to LOGIN_FLOW_ROUTE
+                        onNavigateToLoginChoice = {
+                            navController.navigate(LOGIN_FLOW_ROUTE) {
+                                popUpTo(MAIN_MENU_FLOW_ROUTE) { inclusive = true }
+                            }
+                        },
+                        onNavigateToGame = {
+                            navController.navigate(GAME_FLOW_ROUTE) {
+                                popUpTo(MAIN_MENU_FLOW_ROUTE) { inclusive = false }
+                            }
+                        },
+                        onNavigateToTutorial = { navController.navigate(TUTORIAL_ROUTE) },
+                        onNavigateToSettings = { navController.navigate(SETTINGS_FLOW_ROUTE) },
+                        onNavigateToStats = { navController.navigate(STATS_ROUTE) },
+                        onNavigateToMiniGame = { navController.navigate(MINI_GAME_ROUTE_STATIC) },
+                        onNavigateToEndGame = {
+                            navController.navigate(END_GAME_ROUTE) {
+                                popUpTo(END_GAME_ROUTE) { inclusive = true }
+                            }
+                        },
+                        getState = { _userState },
+                        setState = { setState(it) }
+                    )
+                }
+                composable(STATS_ROUTE) {
+                    StatsScreen(
+                        onNavigateToMainMenu = { navController.popBackStack() },
+                        setState = { setState(it) },
+                        viewModel
+                    )
+                }
+                composable(TUTORIAL_ROUTE) {
+                    TutorialScreen(
+                        onNavigateToMainMenu = { navController.popBackStack() },
+                        setState = { setState(it) }
+                    )
+                }
+                composable(END_GAME_ROUTE) {
+                    EndGameScreen(
+                        onNavigateToStats = {
+                            navController.navigate(STATS_ROUTE) {
+                                popUpTo(STATS_ROUTE) { inclusive = false }
+                            }
+                        },
+                        onNavigateToMainMenu = {
+                            navController.navigate(MENU_ROUTE) {
+                                popUpTo(MENU_ROUTE) { inclusive = false }
+                            }
+                        },
+                        setState = { setState(it) },
+                        getGame = {
+                            viewModel.supabaseDb.getLastFinishedUserGame(
+                                viewModel.supabaseAuth.getCurrentUser()
+                            ) { setState(UserState.InMainMenu) }
+                        },
+                        viewModel = viewModel
+                    )
+                }
+                composable(MINI_GAME_ROUTE_STATIC) {
+                    MinigameScreen(
+                        onNavigateToEndGame = { navController.navigate(END_GAME_ROUTE) },
+                        setState = { setState(it) },
+                        round = 0,
+                        gameUuid = "test-uuid",
+                        viewModel = viewModel
+                    )
+                }
+            }
+
+            // ---------- SETTINGS FLOW ----------
+            navigation(
+                route = SETTINGS_FLOW_ROUTE,
+                startDestination = SETTINGS_MENU_ROUTE
+            ) {
+                composable(SETTINGS_MENU_ROUTE) {
+                    SettingsScreen(
+                        onNavigateToMainMenu = { navController.popBackStack() },
+                        onNavigateToAccountInfo = { navController.navigate(ACCOUNT_INFO_ROUTE) },
+                        onNavigateToThemeChoice = { navController.navigate(THEME_ROUTE) },
+                        onNavigateToDemo = { navController.navigate(DEMO_ROUTE) },
+                        setState = { setState(it) }
+                    )
+                }
+                composable(ACCOUNT_INFO_ROUTE) {
+                    AccountInfoScreen(
+                        onNavigateToSettings = { navController.popBackStack() },
+                        setState = { setState(it) }
+                    )
+                }
+                composable(THEME_ROUTE) {
+                    ThemeScreen(
+                        onNavigateToSettings = { navController.popBackStack() },
+                        setTheme = { _theme.value = it },
+                        setState = { setState(it) }
+                    )
+                }
+                composable(DEMO_ROUTE) {
+                    UwbScreen(
+                        onNavigateToSettings = { navController.popBackStack() },
+                        setState = { setState(it) }
+                    )
+                }
+            }
+
+            // ---------- GAME FLOW ----------
+            navigation(
+                route = GAME_FLOW_ROUTE,
+                startDestination = GAME_START_ROUTE
+            ) {
+                composable(GAME_START_ROUTE) {
+                    CreateGameScreen(
+                        getState = { _userState },
+                        onNavigateToMainMenu = {
+                            navController.navigate(MAIN_MENU_FLOW_ROUTE) {
+                                popUpTo(MAIN_MENU_FLOW_ROUTE) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        setState = { setState(it) }
+                    )
+                }
+            }
+
+            // ---------- SHARED PARAM COMPOSABLES (minigame/waiting) ----------
             composable(
                 route = MINIGAME_ROUTE,
                 arguments = listOf(
@@ -96,20 +304,13 @@ class MainActivity : ComponentActivity() {
                 )
             ) { backStackEntry ->
                 MinigameScreen(
-                    onNavigateToEndGame = {
-                        navController.navigate(EndGame)
-                    },
-                    onNavigateToMainMenu = {
-                        navController.popBackStack()
-                    },
-                    getState = { _userState },
+                    onNavigateToEndGame = { navController.navigate(END_GAME_ROUTE) },
                     setState = { setState(it) },
                     round = backStackEntry.arguments?.getInt("round") ?: 0,
                     gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: "",
                     viewModel = viewModel
                 )
             }
-
             composable(
                 route = WAITING_ROUTE,
                 arguments = listOf(
@@ -117,358 +318,33 @@ class MainActivity : ComponentActivity() {
                     navArgument("round") { type = NavType.IntType },
                     navArgument("score") { type = NavType.IntType },
                     navArgument("isController") { type = NavType.BoolType }
-
                 )
             ) { backStackEntry ->
                 val gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: ""
                 val round = backStackEntry.arguments?.getInt("round") ?: 0
                 val score = backStackEntry.arguments?.getInt("score") ?: 0
-
-                setState(UserState.InWaitingScreen(score, round, gameUuid,
-                    backStackEntry.arguments?.getBoolean("isController") ?: false,))
-
+                setState(
+                    UserState.InWaitingScreen(
+                        score,
+                        round,
+                        gameUuid,
+                        backStackEntry.arguments?.getBoolean("isController") ?: false
+                    )
+                )
                 WaitingScreen(
-                    onNavigateToEndGame = {
-                        navController.navigate(EndGame)
-                    },
+                    onNavigateToEndGame = { navController.navigate(END_GAME_ROUTE) },
                     getState = { _userState },
                     setState = { setState(it) },
                     getEndTime = { 0 },
-                    gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: "",
+                    gameUuid = gameUuid,
                     viewModel = viewModel
                 )
-            }
-
-            navigation<LoginProcess>(startDestination = LoginChoice) {
-                composable<LoginChoice> {
-                    ChoiceScreen(
-                        onNavigateToLogIn = {
-                            navController.navigate(route = Login)
-                        },
-                        onNavigateToSignUp = {
-                            navController.navigate(route = Signup)
-                        },
-                        onNavigateToMainMenu = {
-                            navController.navigate(route = MainMenu) {
-                                popUpTo(LoginChoice) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        getState = {
-                            return@ChoiceScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<Login> {
-                    LoginScreen(
-                        onNavigateToMainMenu = {
-                            navController.navigate(route = MainMenu) {
-                                popUpTo(MainMenu) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        getState = {
-                            return@LoginScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<Signup> {
-                    SignupScreen(
-                        onNavigateToLoginChoice = {
-                            navController.popBackStack()
-                        },
-                        getState = {
-                            return@SignupScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-            }
-            navigation<MainMenu>(startDestination = Menu) {
-                composable<Menu> {
-                    MainMenuScreen(
-                        onNavigateToLoginChoice = {
-                            navController.navigate(route = LoginChoice) {
-                                popUpTo(Menu) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        onNavigateToGame = {
-                            navController.navigate(route = Game) {
-                                popUpTo(Menu) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        onNavigateToTutorial = {
-                            navController.navigate(route = Tutorial)
-                        },
-                        onNavigateToSettings = {
-                            navController.navigate(route = Settings)
-                        },
-                        onNavigateToStats = {
-                            navController.navigate(route = Stats)
-                        },
-                        onNavigateToMiniGame = {
-                            navController.navigate(route = MiniGame)
-                        },
-                        onNavigateToEndGame = {
-                            navController.navigate(route = EndGame){
-                                popUpTo(EndGame) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        getState = {
-                            return@MainMenuScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<Stats> {
-                    StatsScreen(
-                        onNavigateToMainMenu = {
-                            navController.popBackStack()
-                        },
-                        getState = {
-                            return@StatsScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        },
-                        viewModel
-                    )
-                }
-                composable<Tutorial> {
-                    TutorialScreen(
-                        onNavigateToMainMenu = {
-                            navController.popBackStack()
-                        },
-                        getState = {
-                            return@TutorialScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<EndGame> {
-                    EndGameScreen(
-                        getState = {
-                            return@EndGameScreen _userState
-                        },
-                        onNavigateToStats = {
-                            navController.navigate(Stats){
-                                popUpTo(Stats) {
-                                    inclusive = false
-                                }
-                            }
-                        },
-                        onNavigateToMainMenu = {
-                            navController.navigate(MainMenu){
-                                popUpTo(MainMenu) {
-                                    inclusive = false
-                                }
-                            }
-                        },
-                        setState = {
-                            setState(it)
-                        },
-                        getGame = {
-                            viewModel.supabaseDb.getLastFinishedUserGame(viewModel.supabaseAuth.getCurrentUser()) {
-                                setState(
-                                    UserState.InMainMenu
-                                )
-                            }
-                        },
-                        viewModel = viewModel
-                    )
-                }
-                composable<MiniGame> {
-                    MinigameScreen(
-                        onNavigateToEndGame = {
-                            navController.navigate(EndGame)
-                        },
-                        onNavigateToMainMenu = {
-                            navController.popBackStack()
-                        },
-                        getState = {
-                            return@MinigameScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        },
-                        round = 0,
-                        gameUuid = "test-uuid",
-                        viewModel = viewModel
-                    )
-                }
-//                composable("minigame") {
-//                    MinigameScreen(
-//                        onNavigateToEndGame = {
-//                            navController.navigate(EndGame)
-//                        },
-//                        onNavigateToMainMenu = {
-//                            navController.popBackStack()
-//                        },
-//                        getState = { _userState },
-//                        setState = { setState(it) },
-//                        round = -1,
-//                        gameUuid = "uuid",
-//                        viewModel = viewModel,
-//                    )
-//                }
-            }
-            navigation<Settings>(startDestination = SettingsMenu) {
-                composable<SettingsMenu> {
-                    SettingsScreen(
-                        onNavigateToMainMenu = {
-                            navController.popBackStack()
-                        },
-                        onNavigateToAccountInfo = {
-                            navController.navigate(AccountInfo)
-                        },
-                        onNavigateToThemeChoice = {
-                            navController.navigate(Theme)
-                        },
-                        onNavigateToDemo = {
-                            navController.navigate(Demo)
-                        },
-                        getState = {
-                            return@SettingsScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<AccountInfo> {
-                    AccountInfoScreen(
-                        onNavigateToSettings = {
-                            navController.popBackStack()
-                        },
-                        getState = {
-                            return@AccountInfoScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<Theme> {
-                    ThemeScreen(
-                        onNavigateToSettings = {
-                            navController.popBackStack()
-                        },
-                        setTheme = {
-                            _theme.value = it
-                        },
-                        getState = {
-                            return@ThemeScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
-                composable<Demo> {
-                    UwbScreen(
-                        onNavigateToMainMenu = {
-                            navController.popBackStack()
-                        },
-                        getState = {
-                            return@UwbScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        },
-                    )
-                }
-            }
-            navigation<Game>(startDestination = GameStart) {
-                composable<GameStart> {
-                    CreateGameScreen(
-                        getState = {
-                            return@CreateGameScreen _userState
-                        },
-                        setState = {
-                            setState(it)
-                        }
-                    )
-                }
             }
         }
     }
 
-    // region objects
-    @Serializable
-    object LoginProcess
-
-    @Serializable
-    object LoginChoice
-
-    @Serializable
-    object Login
-
-    @Serializable
-    object Signup
-
-    @Serializable
-    object MainMenu
-
-    @Serializable
-    object Menu
-
-    @Serializable
-    object Stats
-
-    @Serializable
-    object Tutorial
-
-    @Serializable
-    object MiniGame
-
-    @Serializable
-    object EndGame
-
-    @Serializable
-    object Settings
-
-    @Serializable
-    object SettingsMenu
-
-    @Serializable
-    object AccountInfo
-
-    @Serializable
-    object Theme
-
-    @Serializable
-    object Demo
-
-    @Serializable
-    object Game
-
-    @Serializable
-    object GameStart
-    // endregion
-
     private fun setState(state: UserState) {
         _userState.value = state
-//        Toast.makeText(this, _userState.value.toString(), Toast.LENGTH_SHORT).show()
     }
 
     override fun onStart() {

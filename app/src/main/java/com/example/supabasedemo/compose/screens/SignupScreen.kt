@@ -1,5 +1,6 @@
 package com.example.supabasedemo.compose.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +39,11 @@ fun SignupScreen(
     var userPassword by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var currentUserState by remember { mutableStateOf("") }
+
+    BackHandler {
+        setState(UserState.InLoginChoice)
+        onNavigateToLoginChoice()
+    }
 
     LaunchedEffect(Unit) {
         setState(UserState.InSignup)

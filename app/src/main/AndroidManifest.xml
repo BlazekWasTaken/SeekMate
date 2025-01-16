@@ -28,6 +28,7 @@
         android:theme="@style/Theme.SupabaseDemo">
         <activity
             android:name=".MainActivity"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:theme="@style/Theme.SplashTheme">
             <intent-filter>

@@ -17,7 +17,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -45,8 +44,7 @@ import kotlin.random.Random
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun UwbScreen(
-    onNavigateToMainMenu: () -> Unit,
-    getState: () -> MutableState<UserState>,
+    onNavigateToSettings: () -> Unit,
     setState: (state: UserState) -> Unit
 ) {
     LaunchedEffect(Unit) {
@@ -177,18 +175,8 @@ fun UwbScreen(
         ArrowView()
 
         BackHandler {
-            setState(UserState.InMainMenu)
-        }
-
-        val userState = getState().value
-        when (userState) {
-            is UserState.InMainMenu -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToMainMenu()
-                }
-            }
-
-            else -> {}
+            setState(UserState.InSettings)
+            onNavigateToSettings()
         }
     }
 }
