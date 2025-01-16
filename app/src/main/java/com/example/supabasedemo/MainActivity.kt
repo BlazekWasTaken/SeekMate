@@ -148,6 +148,7 @@ class MainActivity : ComponentActivity() {
                                 popUpTo(LOGIN_FLOW_ROUTE) { inclusive = true }
                             }
                         },
+                        onNavigateToLoginChoice = { navController.popBackStack() },
                         getState = { _userState },
                         setState = { setState(it) }
                     )

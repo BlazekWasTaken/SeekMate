@@ -1,6 +1,7 @@
 package com.example.supabasedemo.compose.screens
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,23 +36,17 @@ fun ChoiceScreen(
 
     var shouldCompose by remember { mutableStateOf(false) }
 
+    val activity = LocalContext.current as? android.app.Activity
+
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
+
     LaunchedEffect(Unit) {
         viewModel.supabaseAuth.isUserLoggedIn()
     }
 
     when (val state = getState().value) {
-        is UserState.InLogin -> {
-            LaunchedEffect(Unit) {
-                onNavigateToLogIn()
-            }
-        }
-
-        is UserState.InSignup -> {
-            LaunchedEffect(Unit) {
-                onNavigateToSignUp()
-            }
-        }
-
         is UserState.CheckingLoginStatus -> shouldCompose = false
 
         is UserState.CheckedLoginStatusSucceeded -> {
@@ -85,6 +80,7 @@ fun ChoiceScreen(
             MyOutlinedButton(
                 onClick = {
                     setState(UserState.InLogin)
+                    onNavigateToLogIn()
                 }) {
                 Text(text = "Log In")
             }
@@ -92,6 +88,7 @@ fun ChoiceScreen(
             MyOutlinedButton(
                 onClick = {
                     setState(UserState.InSignup)
+                    onNavigateToSignUp()
                 }) {
                 Text(text = "Sign Up")
             }

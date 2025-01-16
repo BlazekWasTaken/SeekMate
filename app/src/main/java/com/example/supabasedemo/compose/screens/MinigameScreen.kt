@@ -78,7 +78,7 @@ fun MinigameScreen(
 ) {
     val activity = LocalContext.current as? android.app.Activity
 
-    BackHandler(enabled = true) {
+    BackHandler {
         activity?.moveTaskToBack(true)
     }
 
