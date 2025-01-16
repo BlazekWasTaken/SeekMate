@@ -10,7 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -234,8 +233,6 @@ class MainActivity : ComponentActivity() {
                 composable(MINI_GAME_ROUTE_STATIC) {
                     MinigameScreen(
                         onNavigateToEndGame = { navController.navigate(END_GAME_ROUTE) },
-                        onNavigateToMainMenu = { navController.popBackStack() },
-                        getState = { _userState },
                         setState = { setState(it) },
                         round = 0,
                         gameUuid = "test-uuid",
@@ -307,8 +304,6 @@ class MainActivity : ComponentActivity() {
             ) { backStackEntry ->
                 MinigameScreen(
                     onNavigateToEndGame = { navController.navigate(END_GAME_ROUTE) },
-                    onNavigateToMainMenu = { navController.popBackStack() },
-                    getState = { _userState },
                     setState = { setState(it) },
                     round = backStackEntry.arguments?.getInt("round") ?: 0,
                     gameUuid = backStackEntry.arguments?.getString("gameUuid") ?: "",

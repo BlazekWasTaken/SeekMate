@@ -8,6 +8,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -70,13 +71,17 @@ val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
 @Composable
 fun MinigameScreen(
     onNavigateToEndGame: () -> Unit,
-    onNavigateToMainMenu: () -> Unit,
-    getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit,
     round: Int = 0,
     gameUuid: String,
     viewModel: MainViewModel
 ) {
+    val activity = LocalContext.current as? android.app.Activity
+
+    BackHandler(enabled = true) {
+        activity?.moveTaskToBack(true)
+    }
+
     LaunchedEffect(Unit) {
         setState(UserState.InMiniGame)
     }
@@ -455,4 +460,5 @@ fun MinigameScreen(
             )
         }
     }
+
 }
