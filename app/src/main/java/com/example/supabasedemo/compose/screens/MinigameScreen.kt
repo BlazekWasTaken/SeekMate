@@ -13,6 +13,7 @@ import android.media.SoundPool
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.supabasedemo.R
@@ -105,7 +107,7 @@ fun MinigameScreen(
     var isHitSoundLoaded by remember { mutableStateOf(false) }
     var isMissSoundLoaded by remember { mutableStateOf(false) }
 
-    val hitSoundId = remember { soundPool.load(context, R.raw.hit,1) }
+    val hitSoundId = remember { soundPool.load(context, R.raw.hit, 1) }
     val missSoundId = remember { soundPool.load(context, R.raw.miss, 1) }
 
     soundPool.setOnLoadCompleteListener { _, loadedSoundId, status ->
@@ -113,9 +115,11 @@ fun MinigameScreen(
             status == 0 && loadedSoundId == hitSoundId -> {
                 isHitSoundLoaded = true
             }
+
             status == 0 && loadedSoundId == missSoundId -> {
                 isMissSoundLoaded = true
             }
+
             else -> {
                 Log.e("sound", "Sound $loadedSoundId load failed with status: $status")
             }
@@ -469,11 +473,11 @@ fun MinigameScreen(
                     val redOffsetYDp = with(density) { redCircle.offsetY.value.toDp() }
 
                     if (redCircle.isVisible) {
-                        Box(
+                        Image(painter = painterResource(id = R.drawable.bombb),
+                            contentDescription = "bomb",
                             modifier = Modifier
                                 .size(circleSize)
                                 .offset(x = redOffsetXDp, y = redOffsetYDp)
-                                .background(Color.Red, CircleShape)
                                 .clickable {
                                     playSoundForEntity(true)
                                     viewModel.decrementScore()
@@ -488,11 +492,11 @@ fun MinigameScreen(
                     val greenSquareOffsetYDp = with(density) { greenSquare.offsetY.value.toDp() }
 
                     if (greenSquare.isVisible) {
-                        Box(
+                        Image(painter = painterResource(id = R.drawable.dynamite),
+                            contentDescription = "dynamite",
                             modifier = Modifier
                                 .size(circleSize)
                                 .offset(x = greenSquareOffsetXDp, y = greenSquareOffsetYDp)
-                                .background(Color.Green)
                                 .clickable {
                                     playSoundForEntity(false)
                                     viewModel.decrementScore()
@@ -503,11 +507,11 @@ fun MinigameScreen(
                 }
 
                 if (isGreenVisible) {
-                    Box(
+                    Image(painter = painterResource(id = R.drawable.star),
+                        contentDescription = "star",
                         modifier = Modifier
                             .size(circleSize)
                             .offset(x = greenOffsetXDp, y = greenOffsetYDp)
-                            .background(Color.Green, CircleShape)
                             .clickable {
                                 playSoundForEntity(false)
                                 viewModel.incrementScore()
