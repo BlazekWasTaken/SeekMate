@@ -204,7 +204,6 @@ class MainActivity : ComponentActivity() {
                 composable(TUTORIAL_ROUTE) {
                     TutorialScreen(
                         onNavigateToMainMenu = { navController.popBackStack() },
-                        getState = { _userState },
                         setState = { setState(it) }
                     )
                 }
