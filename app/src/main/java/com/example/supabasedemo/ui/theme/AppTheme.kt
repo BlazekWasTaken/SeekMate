@@ -192,5 +192,4 @@ fun MyOutlinedTextField(
 object AppTheme {
     val colorScheme: ColorScheme @Composable get() = MaterialTheme.colorScheme
     val typography: Typography @Composable get() = MaterialTheme.typography
-    val shape: Shapes @Composable get() = MaterialTheme.shapes
 }
