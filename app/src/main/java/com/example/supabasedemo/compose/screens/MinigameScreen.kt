@@ -7,6 +7,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.SoundPool
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -41,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.supabasedemo.R
 import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.data.network.UwbManagerSingleton
@@ -86,6 +90,48 @@ fun MinigameScreen(
 
     val context = LocalContext.current
 
+    val soundPool = remember {
+        SoundPool.Builder()
+            .setMaxStreams(3)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .build()
+    }
+
+    var isSoundLoaded by remember { mutableStateOf(false) }
+
+    val soundId = remember { soundPool.load(context, R.raw.click, 1) }
+
+    soundPool.setOnLoadCompleteListener { _, loadedSoundId, status ->
+        if (status == 0 && loadedSoundId == soundId) {
+            isSoundLoaded = true
+            Log.e("sound", "Sound loaded and ready")
+        } else {
+            Log.e("sound", "Sound load failed with status: $status")
+        }
+    }
+
+    fun playPopSound() {
+        if (isSoundLoaded) {
+            Log.e("sound", "Playing sound")
+            soundPool.play(
+                soundId,
+                1f,
+                1f,
+                1,
+                0,
+                1f
+            )
+        } else {
+            Log.e("sound", "Sound is not loaded yet")
+        }
+    }
+
+
     val totalTime = 30
     var timeLeft by remember { mutableIntStateOf(totalTime) }
 
@@ -114,8 +160,7 @@ fun MinigameScreen(
             )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
-        }
-        else{
+        } else {
             viewModel.supabaseDb.updateRoundNumber(
                 gameUuid,
                 round + 1,
@@ -125,8 +170,8 @@ fun MinigameScreen(
                 onError = {
                     setState(UserState.InMainMenu)
                 }
-                )
-            }
+            )
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -156,7 +201,8 @@ fun MinigameScreen(
 
     DisposableEffect(Unit) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val linearAccelerationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        val linearAccelerationSensor =
+            sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event != null) {
@@ -190,6 +236,8 @@ fun MinigameScreen(
         )
         onDispose {
             sensorManager.unregisterListener(sensorEventListener)
+            soundPool.release()
+
         }
     }
 
@@ -410,6 +458,7 @@ fun MinigameScreen(
                                 .offset(x = redOffsetXDp, y = redOffsetYDp)
                                 .background(Color.Red, CircleShape)
                                 .clickable {
+                                    playPopSound()
                                     viewModel.decrementScore()
                                     redCircle.isVisible = false
                                 }
@@ -428,6 +477,7 @@ fun MinigameScreen(
                                 .offset(x = greenSquareOffsetXDp, y = greenSquareOffsetYDp)
                                 .background(Color.Green)
                                 .clickable {
+                                    playPopSound()
                                     viewModel.decrementScore()
                                     greenSquare.isVisible = false
                                 }
@@ -442,6 +492,7 @@ fun MinigameScreen(
                             .offset(x = greenOffsetXDp, y = greenOffsetYDp)
                             .background(Color.Green, CircleShape)
                             .clickable {
+                                playPopSound()
                                 viewModel.incrementScore()
                                 isGreenVisible = false
                             }
