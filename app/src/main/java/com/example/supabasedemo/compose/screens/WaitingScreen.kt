@@ -1,6 +1,8 @@
 package com.example.supabasedemo.compose.screens
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +48,12 @@ fun WaitingScreen(
     gameUuid: String,
     viewModel: MainViewModel
 ) {
+    val activity = LocalActivity.current
+
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
+
     val uwbDistance by UwbManagerSingleton.distanceReadingsFlow.collectAsState()
 
     val userState = getState().value
