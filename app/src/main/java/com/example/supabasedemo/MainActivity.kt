@@ -252,14 +252,12 @@ class MainActivity : ComponentActivity() {
                         onNavigateToAccountInfo = { navController.navigate(ACCOUNT_INFO_ROUTE) },
                         onNavigateToThemeChoice = { navController.navigate(THEME_ROUTE) },
                         onNavigateToDemo = { navController.navigate(DEMO_ROUTE) },
-                        getState = { _userState },
                         setState = { setState(it) }
                     )
                 }
                 composable(ACCOUNT_INFO_ROUTE) {
                     AccountInfoScreen(
                         onNavigateToSettings = { navController.popBackStack() },
-                        getState = { _userState },
                         setState = { setState(it) }
                     )
                 }
@@ -267,14 +265,12 @@ class MainActivity : ComponentActivity() {
                     ThemeScreen(
                         onNavigateToSettings = { navController.popBackStack() },
                         setTheme = { _theme.value = it },
-                        getState = { _userState },
                         setState = { setState(it) }
                     )
                 }
                 composable(DEMO_ROUTE) {
                     UwbScreen(
-                        onNavigateToMainMenu = { navController.popBackStack() },
-                        getState = { _userState },
+                        onNavigateToSettings = { navController.popBackStack() },
                         setState = { setState(it) }
                     )
                 }
