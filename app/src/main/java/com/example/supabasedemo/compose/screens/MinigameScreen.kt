@@ -102,32 +102,49 @@ fun MinigameScreen(
             .build()
     }
 
-    var isSoundLoaded by remember { mutableStateOf(false) }
+    var isHitSoundLoaded by remember { mutableStateOf(false) }
+    var isMissSoundLoaded by remember { mutableStateOf(false) }
 
-    val soundId = remember { soundPool.load(context, R.raw.click, 1) }
+    val hitSoundId = remember { soundPool.load(context, R.raw.hit,1) }
+    val missSoundId = remember { soundPool.load(context, R.raw.miss, 1) }
 
     soundPool.setOnLoadCompleteListener { _, loadedSoundId, status ->
-        if (status == 0 && loadedSoundId == soundId) {
-            isSoundLoaded = true
-            Log.e("sound", "Sound loaded and ready")
-        } else {
-            Log.e("sound", "Sound load failed with status: $status")
+        when {
+            status == 0 && loadedSoundId == hitSoundId -> {
+                isHitSoundLoaded = true
+            }
+            status == 0 && loadedSoundId == missSoundId -> {
+                isMissSoundLoaded = true
+            }
+            else -> {
+                Log.e("sound", "Sound $loadedSoundId load failed with status: $status")
+            }
         }
     }
 
-    fun playPopSound() {
-        if (isSoundLoaded) {
-            Log.e("sound", "Playing sound")
-            soundPool.play(
-                soundId,
-                1f,
-                1f,
-                1,
-                0,
-                1f
-            )
+    fun playSoundForEntity(isMissClicked: Boolean) {
+        if (isMissClicked) {
+            if (isMissSoundLoaded) {
+                soundPool.play(
+                    missSoundId,
+                    1f,
+                    1f,
+                    1,
+                    0,
+                    1f
+                )
+            }
         } else {
-            Log.e("sound", "Sound is not loaded yet")
+            if (isHitSoundLoaded) {
+                soundPool.play(
+                    hitSoundId,
+                    1f,
+                    1f,
+                    1,
+                    0,
+                    1f
+                )
+            }
         }
     }
 
@@ -458,7 +475,7 @@ fun MinigameScreen(
                                 .offset(x = redOffsetXDp, y = redOffsetYDp)
                                 .background(Color.Red, CircleShape)
                                 .clickable {
-                                    playPopSound()
+                                    playSoundForEntity(true)
                                     viewModel.decrementScore()
                                     redCircle.isVisible = false
                                 }
@@ -477,7 +494,7 @@ fun MinigameScreen(
                                 .offset(x = greenSquareOffsetXDp, y = greenSquareOffsetYDp)
                                 .background(Color.Green)
                                 .clickable {
-                                    playPopSound()
+                                    playSoundForEntity(false)
                                     viewModel.decrementScore()
                                     greenSquare.isVisible = false
                                 }
@@ -492,7 +509,7 @@ fun MinigameScreen(
                             .offset(x = greenOffsetXDp, y = greenOffsetYDp)
                             .background(Color.Green, CircleShape)
                             .clickable {
-                                playPopSound()
+                                playSoundForEntity(false)
                                 viewModel.incrementScore()
                                 isGreenVisible = false
                             }
