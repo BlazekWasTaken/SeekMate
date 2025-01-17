@@ -38,9 +38,13 @@ fun EndGameScreen(
     var didUserWin: Boolean by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        var game = getGame()
-        var userId = viewModel.supabaseAuth.getCurrentUser()?.get("sub").toString().trim().replace("\"", "")
-        didUserWin = if (game.user1 == userId) game.won!! else !game.won!!
+        val game = getGame()
+        val userId = viewModel.supabaseAuth.getCurrentUser()?.get("sub").toString().trim().replace("\"", "")
+        if (game.user1 == userId) {
+            didUserWin = game.won!!
+        } else if (game.user2 == userId) {
+            didUserWin = !game.won!!
+        }
     }
 
     Column(

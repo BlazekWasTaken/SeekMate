@@ -121,7 +121,7 @@ fun MinigameScreen(
             setState(UserState.InEndGame)
             onNavigateToEndGame()
         }
-        else{
+        else {
             viewModel.supabaseDb.updateRoundNumber(
                 gameUuid,
                 round + 1,
@@ -147,13 +147,13 @@ fun MinigameScreen(
     //TODO: this user lost
     if (endTimeSubscription != null) {
         LaunchedEffect(Unit) {
-            viewModel.supabaseDb.updateWinner(
-                gameUuid,
-                didUser1Win = !UwbManagerSingleton.isController,
-                onError = {
-                    Log.e("a", "Something went wrong")
-                }
-            )
+//            viewModel.supabaseDb.updateWinner(
+//                gameUuid,
+//                didUser1Win = !UwbManagerSingleton.isController,
+//                onError = {
+//                    Log.e("a", "Something went wrong")
+//                }
+//            )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
         }
