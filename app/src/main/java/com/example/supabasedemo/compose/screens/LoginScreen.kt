@@ -1,6 +1,7 @@
 package com.example.supabasedemo.compose.screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import com.example.supabasedemo.ui.theme.MyOutlinedTextField
 @Composable
 fun LoginScreen(
     onNavigateToMainMenu: () -> Unit,
+    onNavigateToLoginChoice: () -> Unit,
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ) {
@@ -38,6 +40,11 @@ fun LoginScreen(
     var userEmail by remember { mutableStateOf("") }
     var userPassword by remember { mutableStateOf("") }
     var currentUserState by remember { mutableStateOf("") }
+
+    BackHandler {
+        setState(UserState.InLoginChoice)
+        onNavigateToLoginChoice()
+    }
 
     LaunchedEffect(Unit) {
         setState(UserState.InLogin)

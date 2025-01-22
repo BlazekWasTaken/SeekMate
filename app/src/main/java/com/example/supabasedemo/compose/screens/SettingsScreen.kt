@@ -9,12 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 
@@ -24,7 +21,6 @@ fun SettingsScreen(
     onNavigateToAccountInfo: () -> Unit,
     onNavigateToThemeChoice: () -> Unit,
     onNavigateToDemo: () -> Unit,
-    getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ){
     LaunchedEffect(Unit) {
@@ -41,6 +37,7 @@ fun SettingsScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InAccountInfo)
+                onNavigateToAccountInfo()
             }) {
             Text(text = "Account Info")
         }
@@ -48,6 +45,7 @@ fun SettingsScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InThemeChoice)
+                onNavigateToThemeChoice()
             }) {
             Text(text = "Theme choice")
         }
@@ -55,46 +53,14 @@ fun SettingsScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InDemo)
+                onNavigateToDemo()
             }) {
             Text(text = "Demo")
         }
-        Spacer(modifier = Modifier.padding(8.dp))
-        MyOutlinedButton(
-            onClick = {
-                setState(UserState.InMainMenu)
-            }) {
-            Text(text = "Back to Main Menu")
-        }
 
-        //TODO: add everywhere going a page back
         BackHandler {
             setState(UserState.InMainMenu)
+            onNavigateToMainMenu()
         }
-
-        val userState = getState().value
-        when (userState) {
-            is UserState.InMainMenu -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToMainMenu()
-                }
-            }
-            is UserState.InAccountInfo -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToAccountInfo()
-                }
-            }
-            is UserState.InThemeChoice -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToThemeChoice()
-                }
-            }
-            is UserState.InDemo -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToDemo()
-                }
-            }
-            else -> {}
-        }
-
     }
 }

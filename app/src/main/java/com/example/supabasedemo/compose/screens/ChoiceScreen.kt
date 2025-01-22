@@ -1,6 +1,7 @@
 package com.example.supabasedemo.compose.screens
 
-import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
-import kotlinx.coroutines.runBlocking
 
 @Composable
 fun ChoiceScreen(
@@ -35,29 +35,22 @@ fun ChoiceScreen(
 
     var shouldCompose by remember { mutableStateOf(false) }
 
+    val activity = LocalActivity.current
+
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
+
     LaunchedEffect(Unit) {
         viewModel.supabaseAuth.isUserLoggedIn()
     }
 
     when (val state = getState().value) {
-        is UserState.InLogin -> {
-            LaunchedEffect(Unit) {
-                onNavigateToLogIn()
-            }
-        }
-
-        is UserState.InSignup -> {
-            LaunchedEffect(Unit) {
-                onNavigateToSignUp()
-            }
-        }
-
         is UserState.CheckingLoginStatus -> shouldCompose = false
 
         is UserState.CheckedLoginStatusSucceeded -> {
             if (state.message == "User already logged in!") {
                 shouldCompose = false
-                Toast.makeText(LocalContext.current, "You are already logged in", Toast.LENGTH_SHORT)
                 LaunchedEffect(Unit) {
                     onNavigateToMainMenu()
                 }
@@ -85,6 +78,7 @@ fun ChoiceScreen(
             MyOutlinedButton(
                 onClick = {
                     setState(UserState.InLogin)
+                    onNavigateToLogIn()
                 }) {
                 Text(text = "Log In")
             }
@@ -92,6 +86,7 @@ fun ChoiceScreen(
             MyOutlinedButton(
                 onClick = {
                     setState(UserState.InSignup)
+                    onNavigateToSignUp()
                 }) {
                 Text(text = "Sign Up")
             }

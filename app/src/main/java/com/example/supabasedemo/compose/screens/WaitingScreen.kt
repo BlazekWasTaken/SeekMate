@@ -1,6 +1,8 @@
 package com.example.supabasedemo.compose.screens
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +48,12 @@ fun WaitingScreen(
     gameUuid: String,
     viewModel: MainViewModel
 ) {
+    val activity = LocalActivity.current
+
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
+
     val uwbDistance by UwbManagerSingleton.distanceReadingsFlow.collectAsState()
 
     val userState = getState().value
@@ -75,7 +83,9 @@ fun WaitingScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Waiting for the other player...")
+
+        if (UwbManagerSingleton.isController) Text(text = "Look for the other player")
+        else Text(text = "Hide, carefully")
         Spacer(modifier = Modifier.padding(8.dp))
         Text(text = "Score: ${viewModel.score.value}")
         Spacer(modifier = Modifier.padding(8.dp))
@@ -139,13 +149,13 @@ fun WaitingScreen(
     if (endTimeSubscription != null) {
         // TODO: This user lost
         LaunchedEffect(Unit) {
-            viewModel.supabaseDb.updateWinner(
-                gameUuid,
-                didUser1Win = !UwbManagerSingleton.isController,
-                onError = {
-                    Log.e("a", "Something went wrong")
-                }
-            )
+//            viewModel.supabaseDb.updateWinner(
+//                gameUuid,
+//                didUser1Win = !UwbManagerSingleton.isController,
+//                onError = {
+//                    Log.e("a", "Something went wrong")
+//                }
+//            )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
         }

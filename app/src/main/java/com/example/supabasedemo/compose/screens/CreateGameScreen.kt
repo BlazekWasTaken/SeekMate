@@ -1,7 +1,11 @@
 package com.example.supabasedemo.compose.screens
 
+import android.Manifest
+import android.app.Activity
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +29,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.compose.views.QRCodeScanner
 import com.example.supabasedemo.data.model.Game
@@ -40,8 +46,14 @@ import java.util.UUID
 @Composable
 fun CreateGameScreen(
     getState: () -> MutableState<UserState>,
+    onNavigateToMainMenu: () -> Unit,
     setState: (state: UserState) -> Unit
 ) {
+    BackHandler {
+        setState(UserState.InMainMenu)
+        onNavigateToMainMenu()
+    }
+
     val context = LocalContext.current
     val viewModel = MainViewModel(context, setState = { setState(it) })
 
@@ -56,10 +68,22 @@ fun CreateGameScreen(
     val deviceAddress by UwbManagerSingleton.address.collectAsState(initial = "-1")
     val devicePreamble by UwbManagerSingleton.preamble.collectAsState(initial = "-1")
 
+    var permissionGranted by remember { mutableStateOf(false) }
+
     var gameSubscription by remember { mutableStateOf<Game?>(null) }
 
     LaunchedEffect(Unit) {
         setState(UserState.InGameCreation)
+
+        permissionGranted = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.UWB_RANGING
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!permissionGranted) {
+            ActivityCompat.requestPermissions(
+                context as Activity, arrayOf(Manifest.permission.UWB_RANGING), 101
+            )
+        }
+
         viewModel.supabaseAuth.isUserLoggedIn()
         UwbManagerSingleton.initialize(context, true)
     }
@@ -95,10 +119,11 @@ fun CreateGameScreen(
         MyOutlinedButton(
             onClick = {
                 val gameUuid = UUID.randomUUID().toString()
+                val bitmap = generateQRCode(gameUuid, deviceAddress, devicePreamble)
                 gameDetails = viewModel.supabaseDb.createGameInSupabase(
                     gameUuid,
                     onGameCreated = {
-                        qrCodeBitmap = generateQRCode(gameUuid, deviceAddress, devicePreamble) ?: run {
+                        qrCodeBitmap = bitmap ?: run {
                             errorMessage = "Error generating QR code"
                             return@createGameInSupabase
                         }

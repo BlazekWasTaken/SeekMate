@@ -2,9 +2,7 @@ package com.example.supabasedemo.data.network
 
 import android.content.Context
 import android.util.Log
-import com.example.supabasedemo.MainActivity.Demo
-import com.example.supabasedemo.MainActivity.MiniGame
-import com.example.supabasedemo.MainActivity.Settings
+import com.example.supabasedemo.MainActivity.Companion.DEMO_ROUTE
 import com.example.supabasedemo.NavControllerProvider
 import com.example.supabasedemo.data.model.Game
 import com.example.supabasedemo.data.model.UserState
@@ -55,7 +53,7 @@ class SupabaseRealtimeHelper(
             if (updatedGame.end_time == null) {
                 when {
                     updatedGame.round_no == -1 -> {
-                        NavControllerProvider.navController.navigate(route = Demo)
+                        NavControllerProvider.navController.navigate(route = DEMO_ROUTE)
                     }
 
                     updatedGame.round_no == 0 -> {

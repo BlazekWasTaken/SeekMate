@@ -11,26 +11,20 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
-import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.example.supabasedemo.ui.theme.ThemeChoice
 
 @Composable
 fun ThemeScreen(
     onNavigateToSettings: () -> Unit,
     setTheme: (theme: ThemeChoice) -> Unit,
-    getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ){
     LaunchedEffect(Unit) {
@@ -89,28 +83,10 @@ fun ThemeScreen(
                 )
             }
         }
-        Spacer(modifier = Modifier.padding(8.dp))
-        MyOutlinedButton(
-            onClick = {
-                setState(UserState.InSettings)
-            }) {
-            Text(text = "Back to Settings")
-        }
 
-        //TODO: add everywhere going a page back
         BackHandler {
             setState(UserState.InSettings)
+            onNavigateToSettings()
         }
-
-        val userState = getState().value
-        when (userState) {
-            is UserState.InSettings -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToSettings()
-                }
-            }
-            else -> {}
-        }
-
     }
 }

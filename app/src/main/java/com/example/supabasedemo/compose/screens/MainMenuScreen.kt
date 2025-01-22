@@ -1,5 +1,7 @@
 package com.example.supabasedemo.compose.screens
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +31,11 @@ fun MainMenuScreen(
     getState: () -> MutableState<UserState>,
     setState: (state: UserState) -> Unit
 ) {
+    val activity = LocalActivity.current
+    BackHandler {
+        activity?.moveTaskToBack(true)
+    }
+
     val viewModel = MainViewModel(LocalContext.current, setState = { setState(it) })
 
     LaunchedEffect(Unit) {
@@ -52,6 +59,7 @@ fun MainMenuScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InSettings)
+                onNavigateToSettings()
             }) {
             Text(text = "Settings")
         }
@@ -59,6 +67,7 @@ fun MainMenuScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InGameCreation)
+                onNavigateToGame()
             }) {
             Text(text = "Play now")
         }
@@ -66,6 +75,7 @@ fun MainMenuScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InStats)
+                onNavigateToStats()
             }) {
             Text(text = "See stats")
         }
@@ -73,6 +83,7 @@ fun MainMenuScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InTutorial)
+                onNavigateToTutorial()
             }) {
             Text(text = "How to play?")
         }
@@ -80,6 +91,7 @@ fun MainMenuScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InMiniGame)
+                onNavigateToMiniGame()
             }) {
             Text(text = "Mini-game")
         }
@@ -93,30 +105,6 @@ fun MainMenuScreen(
             }
         }
 
-        is UserState.InSettings -> {
-            LaunchedEffect(Unit) {
-                onNavigateToSettings()
-            }
-        }
-
-        is UserState.InGameCreation -> {
-            LaunchedEffect(Unit) {
-                onNavigateToGame()
-            }
-        }
-
-        is UserState.InStats -> {
-            LaunchedEffect(Unit) {
-                onNavigateToStats()
-            }
-        }
-
-        is UserState.InTutorial -> {
-            LaunchedEffect(Unit) {
-                onNavigateToTutorial()
-            }
-        }
-
         is UserState.LogoutSucceeded -> {
             LaunchedEffect(Unit) {
                 onNavigateToLoginChoice()
@@ -126,12 +114,6 @@ fun MainMenuScreen(
         is UserState.LogoutFailed -> {
             LaunchedEffect(Unit) {
                 setState(UserState.InMainMenu)
-            }
-        }
-
-        is UserState.InMiniGame -> {
-            LaunchedEffect(Unit) {
-                onNavigateToMiniGame()
             }
         }
 

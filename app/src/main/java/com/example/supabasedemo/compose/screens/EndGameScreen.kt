@@ -29,7 +29,6 @@ import com.example.supabasedemo.ui.theme.MyOutlinedButton
 
 @Composable
 fun EndGameScreen(
-    getState: () -> MutableState<UserState>,
     setState: (UserState) -> Unit,
     onNavigateToMainMenu: () -> Unit,
     getGame: () -> Game,
@@ -39,9 +38,13 @@ fun EndGameScreen(
     var didUserWin: Boolean by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        var game = getGame()
-        var userId = viewModel.supabaseAuth.getCurrentUser()?.get("sub").toString().trim().replace("\"", "")
-        didUserWin = if (game.user1 == userId) game.won!! else !game.won!!
+        val game = getGame()
+        val userId = viewModel.supabaseAuth.getCurrentUser()?.get("sub").toString().trim().replace("\"", "")
+        if (game.user1 == userId) {
+            didUserWin = game.won!!
+        } else if (game.user2 == userId) {
+            didUserWin = !game.won!!
+        }
     }
 
     Column(
@@ -61,6 +64,7 @@ fun EndGameScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InStats)
+                onNavigateToStats()
             }) {
             Text(text = "See stats")
         }
@@ -68,27 +72,14 @@ fun EndGameScreen(
         MyOutlinedButton(
             onClick = {
                 setState(UserState.InMainMenu)
+                onNavigateToMainMenu()
             }) {
             Text(text = "Back to Main Menu")
         }
 
         BackHandler {
             setState(UserState.InMainMenu)
-        }
-
-        val userState = getState().value
-        when (userState) {
-            is UserState.InMainMenu -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToMainMenu()
-                }
-            }
-            is UserState.InAccountInfo -> {
-                LaunchedEffect(Unit) {
-                    onNavigateToStats()
-                }
-            }
-            else -> {}
+            onNavigateToMainMenu()
         }
     }
 }
