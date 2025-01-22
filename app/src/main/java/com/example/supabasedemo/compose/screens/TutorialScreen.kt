@@ -138,13 +138,6 @@ fun TutorialScreen(
                 }
             }
         }
-        Spacer(modifier = Modifier.padding(12.dp))
-        MyOutlinedButton(
-            onClick = {
-                setState(UserState.InMainMenu)
-            }) {
-            Text(text = "Back to Main Menu")
-        }
 
         BackHandler {
             setState(UserState.InMainMenu)

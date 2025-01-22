@@ -40,6 +40,8 @@ import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.util.UUID
 
@@ -123,6 +125,9 @@ fun CreateGameScreen(
                 gameDetails = viewModel.supabaseDb.createGameInSupabase(
                     gameUuid,
                     onGameCreated = {
+                        runBlocking {
+                            delay(1000)
+                        }
                         qrCodeBitmap = bitmap ?: run {
                             errorMessage = "Error generating QR code"
                             return@createGameInSupabase

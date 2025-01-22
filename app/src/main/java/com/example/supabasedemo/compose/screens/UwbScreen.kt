@@ -6,13 +6,20 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -37,6 +45,7 @@ import com.example.supabasedemo.compose.views.GyroscopeView
 import com.example.supabasedemo.compose.views.RotationView
 import com.example.supabasedemo.compose.views.UwbDataView
 import com.example.supabasedemo.data.model.UserState
+import com.example.supabasedemo.ui.theme.AppTheme
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.example.supabasedemo.ui.theme.MyOutlinedTextField
 import kotlin.random.Random
@@ -84,99 +93,109 @@ fun UwbScreen(
         UwbManagerSingleton.fetchDeviceDetails()
     }
 
-    Column(
+    Box(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .border(1.dp, AppTheme.colorScheme.outline, RectangleShape)
+            .fillMaxWidth()
+            .height(900.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Controller:")
-            Spacer(modifier = Modifier.padding(8.dp))
-            Switch(checked = isController, onCheckedChange = {
-                isController = it
-                UwbManagerSingleton.setRoleAsController(it, context)
-                UwbManagerSingleton.stopSession()
-            })
-        }
-        MyOutlinedTextField(
-            value = address,
-            onValueChange = { address = it },
-            placeholder = { Text(text = "Enter Partner Address") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-        )
-        if (!isController) {
-            Spacer(modifier = Modifier.padding(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Controller:")
+                Spacer(modifier = Modifier.padding(8.dp))
+                Switch(checked = isController, onCheckedChange = {
+                    isController = it
+                    UwbManagerSingleton.setRoleAsController(it, context)
+                    UwbManagerSingleton.stopSession()
+                })
+            }
             MyOutlinedTextField(
-                value = preamble,
-                onValueChange = { preamble = it },
-                placeholder = { Text(text = "Enter Preamble Value") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                value = address,
+                onValueChange = { address = it },
+                placeholder = { Text(text = "Enter Partner Address") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
+            if (!isController) {
+                Spacer(modifier = Modifier.padding(8.dp))
+                MyOutlinedTextField(
+                    value = preamble,
+                    onValueChange = { preamble = it },
+                    placeholder = { Text(text = "Enter Preamble Value") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Spacer(modifier = Modifier.padding(8.dp))
+                MyOutlinedTextField(
+                    value = directionId.toString(),
+                    onValueChange = {
+                        directionId = if (it != "") it.toInt() else 0
+                    },
+                    placeholder = { Text(text = "Enter directionId Value") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
             Spacer(modifier = Modifier.padding(8.dp))
-            MyOutlinedTextField(
-                value = directionId.toString(),
-                onValueChange = {
-                    directionId = if(it != "") it.toInt() else 0 },
-                placeholder = { Text(text = "Enter directionId Value") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-        Text(text = "Your Device Address: $deviceAddress")
-        if (isController) {
-            Text(text = "Your Preamble: $devicePreamble")
-            Text(text = "Your directionId: $directionId")
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-        if (!isStarted) {
-            MyOutlinedButton(onClick = {
-                if (address.isNotBlank()) {
-                    if (isController) {
-                        viewModel.supabaseDb.createDirection(directionId)
-                        UwbManagerSingleton.startSession(address, "0")
-                    } else {
-                        UwbManagerSingleton.startSession(address, preamble)
+            Text(text = "Your Device Address: $deviceAddress")
+            if (isController) {
+                Text(text = "Your Preamble: $devicePreamble")
+                Text(text = "Your directionId: $directionId")
+            }
+            Spacer(modifier = Modifier.padding(8.dp))
+            if (!isStarted) {
+                MyOutlinedButton(onClick = {
+                    if (address.isNotBlank()) {
+                        if (isController) {
+                            viewModel.supabaseDb.createDirection(directionId)
+                            UwbManagerSingleton.startSession(address, "0")
+                        } else {
+                            UwbManagerSingleton.startSession(address, preamble)
+                        }
                     }
+                }) {
+                    Text(text = "Start")
                 }
-            }) {
-                Text(text = "Start")
+            } else {
+                MyOutlinedButton(onClick = {
+                    UwbManagerSingleton.stopSession()
+                }) {
+                    Text(text = "Stop")
+                }
             }
-        } else {
-            MyOutlinedButton(onClick = {
-                UwbManagerSingleton.stopSession()
-            }) {
-                Text(text = "Stop")
+            Spacer(modifier = Modifier.padding(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                UwbDataView()
+                Spacer(modifier = Modifier.padding(8.dp))
+                GyroscopeView(context)
             }
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            UwbDataView()
             Spacer(modifier = Modifier.padding(8.dp))
-            GyroscopeView(context)
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            AccelerometerView(context)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                AccelerometerView(context)
+                Spacer(modifier = Modifier.padding(8.dp))
+                RotationView(context)
+            }
             Spacer(modifier = Modifier.padding(8.dp))
-            RotationView(context)
-        }
-        Spacer(modifier = Modifier.padding(8.dp))
-        ArrowView()
+            ArrowView()
+            Spacer(modifier = Modifier.padding(24.dp))
 
-        BackHandler {
-            setState(UserState.InSettings)
-            onNavigateToSettings()
+            BackHandler {
+                setState(UserState.InSettings)
+                onNavigateToSettings()
+            }
         }
     }
 }
