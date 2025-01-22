@@ -7,11 +7,15 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.SoundPool
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,8 +45,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.supabasedemo.R
 import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.data.network.UwbManagerSingleton
@@ -92,6 +98,67 @@ fun MinigameScreen(
 
     val context = LocalContext.current
 
+    val soundPool = remember {
+        SoundPool.Builder()
+            .setMaxStreams(3)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .build()
+    }
+
+    var isHitSoundLoaded by remember { mutableStateOf(false) }
+    var isMissSoundLoaded by remember { mutableStateOf(false) }
+
+    val hitSoundId = remember { soundPool.load(context, R.raw.hit, 1) }
+    val missSoundId = remember { soundPool.load(context, R.raw.miss, 1) }
+
+    soundPool.setOnLoadCompleteListener { _, loadedSoundId, status ->
+        when {
+            status == 0 && loadedSoundId == hitSoundId -> {
+                isHitSoundLoaded = true
+            }
+
+            status == 0 && loadedSoundId == missSoundId -> {
+                isMissSoundLoaded = true
+            }
+
+            else -> {
+                Log.e("sound", "Sound $loadedSoundId load failed with status: $status")
+            }
+        }
+    }
+
+    fun playSoundForEntity(isMissClicked: Boolean) {
+        if (isMissClicked) {
+            if (isMissSoundLoaded) {
+                soundPool.play(
+                    missSoundId,
+                    1f,
+                    1f,
+                    1,
+                    0,
+                    1f
+                )
+            }
+        } else {
+            if (isHitSoundLoaded) {
+                soundPool.play(
+                    hitSoundId,
+                    1f,
+                    1f,
+                    1,
+                    0,
+                    1f
+                )
+            }
+        }
+    }
+
+
     val totalTime = 30
     var timeLeft by remember { mutableIntStateOf(totalTime) }
 
@@ -120,8 +187,7 @@ fun MinigameScreen(
             )
             setState(UserState.InEndGame)
             onNavigateToEndGame()
-        }
-        else {
+        } else {
             viewModel.supabaseDb.updateRoundNumber(
                 gameUuid,
                 round + 1,
@@ -131,8 +197,8 @@ fun MinigameScreen(
                 onError = {
                     setState(UserState.InMainMenu)
                 }
-                )
-            }
+            )
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -162,7 +228,8 @@ fun MinigameScreen(
 
     DisposableEffect(Unit) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val linearAccelerationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        val linearAccelerationSensor =
+            sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
         val sensorEventListener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event != null) {
@@ -196,6 +263,8 @@ fun MinigameScreen(
         )
         onDispose {
             sensorManager.unregisterListener(sensorEventListener)
+            soundPool.release()
+
         }
     }
 
@@ -410,12 +479,13 @@ fun MinigameScreen(
                     val redOffsetYDp = with(density) { redCircle.offsetY.value.toDp() }
 
                     if (redCircle.isVisible) {
-                        Box(
+                        Image(painter = painterResource(id = R.drawable.bombb),
+                            contentDescription = "bomb",
                             modifier = Modifier
                                 .size(circleSize)
                                 .offset(x = redOffsetXDp, y = redOffsetYDp)
-                                .background(Color.Red, CircleShape)
                                 .clickable {
+                                    playSoundForEntity(true)
                                     viewModel.decrementScore()
                                     redCircle.isVisible = false
                                 }
@@ -428,12 +498,13 @@ fun MinigameScreen(
                     val greenSquareOffsetYDp = with(density) { greenSquare.offsetY.value.toDp() }
 
                     if (greenSquare.isVisible) {
-                        Box(
+                        Image(painter = painterResource(id = R.drawable.dynamite),
+                            contentDescription = "dynamite",
                             modifier = Modifier
                                 .size(circleSize)
                                 .offset(x = greenSquareOffsetXDp, y = greenSquareOffsetYDp)
-                                .background(Color.Green)
                                 .clickable {
+                                    playSoundForEntity(true)
                                     viewModel.decrementScore()
                                     greenSquare.isVisible = false
                                 }
@@ -442,12 +513,13 @@ fun MinigameScreen(
                 }
 
                 if (isGreenVisible) {
-                    Box(
+                    Image(painter = painterResource(id = R.drawable.star),
+                        contentDescription = "star",
                         modifier = Modifier
                             .size(circleSize)
                             .offset(x = greenOffsetXDp, y = greenOffsetYDp)
-                            .background(Color.Green, CircleShape)
                             .clickable {
+                                playSoundForEntity(false)
                                 viewModel.incrementScore()
                                 isGreenVisible = false
                             }

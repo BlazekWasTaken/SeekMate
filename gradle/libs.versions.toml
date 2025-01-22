@@ -11,6 +11,7 @@ activityCompose = "1.10.0"
 composeBom = "2025.01.00"
 composeNavigation = "2.8.5"
 lifecycleViewmodelCompose = "2.8.7"
+media = "1.7.0"
 serialization = "1.7.3"
 
 ktorClientOkhttp = "3.0.0"
@@ -32,6 +33,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-media = { module = "androidx.media:media", version.ref = "media" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
