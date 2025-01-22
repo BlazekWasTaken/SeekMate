@@ -79,37 +79,37 @@ fun StatsScreen(
         Text(textAlign = TextAlign.Center, text = "Games won: $gamesWon")
         Spacer(modifier = Modifier.padding(8.dp))
         Text(textAlign = TextAlign.Center, text = "Games lost: $gamesLost")
-        if (avgRoundWon == 0.0) {
+        if (avgRoundWon != 0.0) {
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 textAlign = TextAlign.Center,
                 text = "Won after an average of rounds: $avgRoundWon")
         }
-        if (avgRoundLost == 0.0) {
+        if (avgRoundLost != 0.0) {
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 textAlign = TextAlign.Center,
                 text = "Lost after an average of rounds: $avgRoundLost")
         }
-        if (avgTimeWonAsSeeker == 0.0) {
+        if (avgTimeWonAsSeeker != 0.0) {
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 textAlign = TextAlign.Center,
                 text = "Won as seeker after an average of: ${(avgTimeWonAsSeeker/60).toInt()}:${if (floor(avgTimeWonAsSeeker%60) < 10) "0" else ""}${floor(avgTimeWonAsSeeker%60).toInt()}")
         }
-        if (avgTimeLostAsSeeker == 0.0) {
+        if (avgTimeLostAsSeeker != 0.0) {
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 textAlign = TextAlign.Center,
                 text = "Lost as seeker after an average of: ${(avgTimeLostAsSeeker/60).toInt()}:${if (floor(avgTimeLostAsSeeker%60) < 10) "0" else ""}${floor(avgTimeLostAsSeeker%60).toInt()}")
         }
-        if (avgTimeWonAsHider == 0.0) {
+        if (avgTimeWonAsHider != 0.0) {
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 textAlign = TextAlign.Center,
                 text = "Won as hider after an average of: ${floor(avgTimeWonAsHider/60).toInt()}:${if (floor(avgTimeWonAsHider%60) < 10) "0" else ""}${floor(avgTimeWonAsHider%60).toInt()}")
         }
-        if (avgTimeWonAsSeeker == 0.0) {
+        if (avgTimeWonAsSeeker != 0.0) {
             Spacer(modifier = Modifier.padding(8.dp))
             Text(
                 textAlign = TextAlign.Center,
