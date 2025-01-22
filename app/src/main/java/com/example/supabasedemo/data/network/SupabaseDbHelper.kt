@@ -20,6 +20,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 class SupabaseDbHelper(
+    private val scope: CoroutineScope,
     val setState: (UserState) -> Unit,
 ) {
     fun getFinishedUser1Games(
@@ -250,10 +251,50 @@ class SupabaseDbHelper(
             }
         }
     }
+
+    fun createCollectingData(
+//        id: Int,
+        physicalAngle: Float,
+        physicalDistance: Float,
+        uwbAngle: Float,
+        uwbDistance: Float,
+        onError: (String) -> Unit,
+    ) {
+        val data = DataRecord(
+//            id,
+            physicalAngle,
+            physicalDistance,
+            uwbAngle,
+            uwbDistance
+        )
+
+        scope.launch {
+            try {
+                 client.from("data_for_report")
+                    .insert(data) {
+                        select()
+                    }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.d("Supabase", "catch (e: Exception: $e")
+                    onError(e.message ?: "Unexpected error occurred.")
+                }
+            }
+        }
+    }
 }
 
 @Serializable
 class DirectionRecord (
     val id: Int,
     val direction: Float
+)
+
+@Serializable
+class DataRecord (
+//    val id: Int,
+    val physical_angle: Float,
+    val physical_distance: Float,
+    val uwb_angle: Float,
+    val uwb_distance: Float
 )

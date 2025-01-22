@@ -53,6 +53,9 @@ object UwbManagerSingleton {
     private val _distanceReadingsFlow = MutableStateFlow(listOf(0F))
     val distanceReadingsFlow: StateFlow<List<Float>> get() = _distanceReadingsFlow
 
+    private val _angleReadingsFlow = MutableStateFlow(listOf(0F))
+    val angleReadingsFlow: StateFlow<List<Float>> get() = _angleReadingsFlow
+
     fun initialize(context: Context, isController: Boolean) {
         stopSession()
         UwbManagerSingleton.isController = isController
@@ -143,6 +146,7 @@ object UwbManagerSingleton {
                 _azimuth.value = result.position.azimuth?.value ?: -1F
                 _distance.value = result.position.distance?.value ?: -1F
                 _distanceReadingsFlow.value += result.position.distance?.value ?: -1F
+                _angleReadingsFlow.value += result.position.azimuth?.value ?: -1F
                 Log.d("uwb", "Distance: ${_distance.value} Azimuth: ${_azimuth.value}")
             }
 

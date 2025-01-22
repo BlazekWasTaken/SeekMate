@@ -17,7 +17,7 @@ class MainViewModel(
     val supabaseAuth: SupabaseAuthHelper =
         SupabaseAuthHelper(viewModelScope, setState = { setState(it) }, context)
     val supabaseDb: SupabaseDbHelper =
-        SupabaseDbHelper(setState = { setState(it) })
+        SupabaseDbHelper(viewModelScope, setState = { setState(it) })
     val supabaseRealtime: SupabaseRealtimeHelper =
         SupabaseRealtimeHelper(viewModelScope, setState = { setState(it) }, context)
 
