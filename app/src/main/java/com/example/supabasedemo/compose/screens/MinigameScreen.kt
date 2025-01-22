@@ -498,7 +498,7 @@ fun MinigameScreen(
                                 .size(circleSize)
                                 .offset(x = greenSquareOffsetXDp, y = greenSquareOffsetYDp)
                                 .clickable {
-                                    playSoundForEntity(false)
+                                    playSoundForEntity(true)
                                     viewModel.decrementScore()
                                     greenSquare.isVisible = false
                                 }
