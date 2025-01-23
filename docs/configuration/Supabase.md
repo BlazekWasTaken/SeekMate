@@ -69,3 +69,5 @@
 
 #### 4.1 Add saved properties to the local.properties file
 <p align="center" width="100%"><img src="./supabase/properties.webp" width="60%"></p>
+
+---
