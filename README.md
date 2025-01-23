@@ -117,19 +117,6 @@ graph TD;
 
 ### 8. 📜 Application Configuration Instructions
 
-**Supabase Integration**:
-
--   Set up a Supabase project.
--   Configure API keys in file [build.gradle.kts](./app/build.gradle.kts)
-
-    ```kotlin
-       val key: String =
-       com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir, providers)
-           .getProperty("supabaseKey")
-       val url: String =
-       com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir, providers)
-           .getProperty("supabaseUrl")
-
-    ```
+[🔗 Go to Instructions](./docs/configuration/Supabase.md)
 
 ---
