@@ -1,13 +1,7 @@
 <html xmlns="http://www.w3.org/TR/REC-html40">
 
 <head>
-    <title>Jira</title>
     <style type="text/css">
-        table {
-            mso-displayed-decimal-separator: "\.";
-            mso-displayed-thousand-separator: "\,";
-        }
-
         body {
             margin: 0px;
             font-size: 12px;
@@ -15,8 +9,6 @@
             color: black;
         }
     </style>
-    <META HTTP-EQUIV="Content-Type" Content="application/vnd.ms-excel; charset=UTF-8">
-
     <style>
         @page {
             mso-page-orientation: landscape;
@@ -31,14 +23,9 @@
         td.issuekey,
         td.issuetype,
         td.status {
-            mso-style-parent: "";
-            mso-number-format: \@;
             text-align: left;
         }
 
-        br {
-            mso-data-placement: same-cell;
-        }
 
         td {
             vertical-align: top;
@@ -52,23 +39,23 @@
         <thead>
             <tr class="rowHeader">
 
-                <th class="colHeaderLink headerrow-summary" data-id="summary">
+                <th data-id="summary">
                     Summary
                 </th>
 
-                <th class="colHeaderLink headerrow-assignee" data-id="assignee">
+                <th data-id="assignee">
                     Assignee
                 </th>
 
-                <th class="colHeaderLink headerrow-updated" data-id="updated">
+                <th data-id="updated">
                     Updated
                 </th>
 
-                <th class="colHeaderLink headerrow-issuekey" data-id="issuekey">
+                <th data-id="issuekey">
                     Key
                 </th>
 
-                <th class="colHeaderLink headerrow-created" data-id="created">
+                <th data-id="created">
                     Created
                 </th>
             </tr>
@@ -76,7 +63,7 @@
         <tbody>
 
 
-            <tr id="issuerow10065" rel="10065" data-issuekey="SCRUM-44" class="issuerow">
+            <tr id="issuerow10065" rel="10065" data-issuekey="SCRUM-44">
                 <td class="summary">
                     <p>
                         make the app navigation work more consistently and predictably

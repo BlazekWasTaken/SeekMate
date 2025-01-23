@@ -3,11 +3,6 @@
 <head>
     <title>Jira</title>
     <style type="text/css">
-        table {
-            mso-displayed-decimal-separator: "\.";
-            mso-displayed-thousand-separator: "\,";
-        }
-
         body {
             margin: 0px;
             font-size: 12px;
@@ -15,18 +10,12 @@
             color: black;
         }
     </style>
-    <META HTTP-EQUIV="Content-Type" Content="application/vnd.ms-excel; charset=UTF-8">
-    <!-- JRA-7598 - ensure fields (e.g. description) occupy only one cell - even fields containing newlines. -->
-    <!--
-Vertical align all cells to the top, in order to align all issue rows of issuetable to the top,
-since Excel does not use or save the css files it is hardcoded here.
--->
     <style>
         @page {
             mso-page-orientation: landscape;
-            margin: .25in .25in .5in .25in;
-            mso-header-margin: .5in;
-            mso-footer-margin: .25in;
+            margin: 0.25in 0.25in 0.5in 0.25in;
+            mso-header-margin: 0.5in;
+            mso-footer-margin: 0.25in;
             mso-footer-data: "&R&P of &N";
             mso-horizontal-page-align: center;
             mso-vertical-page-align: center;
@@ -35,228 +24,168 @@ since Excel does not use or save the css files it is hardcoded here.
         td.issuekey,
         td.issuetype,
         td.status {
-            mso-style-parent: "";
-            mso-number-format: \@;
             text-align: left;
-        }
-
-        br {
-            mso-data-placement: same-cell;
         }
 
         td {
             vertical-align: top;
         }
     </style>
-
 </head>
 
 <body>
-    <table id="issuetable" class="aui " border="1" cellpadding="3" cellspacing="1" width="100%">
+    <table id="issuetable" class="aui" border="1" cellpadding="3" cellspacing="1" width="100%">
         <thead>
             <tr class="rowHeader">
+                <th data-id="summary">Summary</th>
 
-                <th class="colHeaderLink headerrow-summary" data-id="summary">
-                    Summary
-                </th>
+                <th data-id="assignee">Assignee</th>
 
-                <th class="colHeaderLink headerrow-assignee" data-id="assignee">
-                    Assignee
-                </th>
+                <th data-id="updated">Updated</th>
 
-                <th class="colHeaderLink headerrow-updated" data-id="updated">
-                    Updated
-                </th>
+                <th data-id="issuekey">Key</th>
 
-                <th class="colHeaderLink headerrow-issuekey" data-id="issuekey">
-                    Key
-                </th>
-
-                <th class="colHeaderLink headerrow-created" data-id="created">
-                    Created
-                </th>
+                <th data-id="created">Created</th>
             </tr>
         </thead>
         <tbody>
-
-
-            <tr id="issuerow10063" rel="10063" data-issuekey="SCRUM-42" class="issuerow">
+            <tr id="issuerow10063" rel="10063" data-issuekey="SCRUM-42">
                 <td class="summary">
                     <p>
-                        make the game stop when an ending condition is met or enough time passed
+                        make the game stop when an ending condition is met
+                        or enough time passed
                     </p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 17/Jan/25 12:33 AM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">17/Jan/25 12:33 AM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-42"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-42">SCRUM-42</a>
                 </td>
-                <td class="created"> 17/Jan/25 12:30 AM </td>
+                <td class="created">17/Jan/25 12:30 AM</td>
             </tr>
-
 
             <tr id="issuerow10059" rel="10059" data-issuekey="SCRUM-38" class="issuerow">
                 <td class="summary">
-                    <p>
-                        make the uwb angle work when facing back
-                    </p>
+                    <p>make the uwb angle work when facing back</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 17/Jan/25 12:28 AM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">17/Jan/25 12:28 AM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-38"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-38">SCRUM-38</a>
                 </td>
-                <td class="created"> 17/Jan/25 12:25 AM </td>
+                <td class="created">17/Jan/25 12:25 AM</td>
             </tr>
-
 
             <tr id="issuerow10055" rel="10055" data-issuekey="SCRUM-34" class="issuerow">
                 <td class="summary">
-                    <p>
-                        Implement ml model
-                    </p>
+                    <p>Implement ml model</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 09/Jan/25 4:55 PM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">09/Jan/25 4:55 PM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-34"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-34">SCRUM-34</a>
                 </td>
-                <td class="created"> 13/Dec/24 1:16 PM </td>
+                <td class="created">13/Dec/24 1:16 PM</td>
             </tr>
-
 
             <tr id="issuerow10049" rel="10049" data-issuekey="SCRUM-28" class="issuerow">
                 <td class="summary">
                     <p>
-                        Collect test data for machine learning to fix reverse angle
+                        Collect test data for machine learning to fix
+                        reverse angle
                     </p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 13/Dec/24 1:15 PM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">13/Dec/24 1:15 PM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-28"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-28">SCRUM-28</a>
                 </td>
-                <td class="created"> 05/Dec/24 4:21 PM </td>
+                <td class="created">05/Dec/24 4:21 PM</td>
             </tr>
-
 
             <tr id="issuerow10045" rel="10045" data-issuekey="SCRUM-24" class="issuerow">
                 <td class="summary">
                     <p>
-                        Keep working on the app and integrate changes already made
+                        Keep working on the app and integrate changes
+                        already made
                     </p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 29/Nov/24 10:19 AM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">29/Nov/24 10:19 AM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-24"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-24">SCRUM-24</a>
                 </td>
-                <td class="created"> 25/Nov/24 6:08 PM </td>
+                <td class="created">25/Nov/24 6:08 PM</td>
             </tr>
-
 
             <tr id="issuerow10041" rel="10041" data-issuekey="SCRUM-20" class="issuerow">
                 <td class="summary">
-                    <p>
-                        Make the theme work automatically
-                    </p>
+                    <p>Make the theme work automatically</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 22/Nov/24 11:32 AM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">22/Nov/24 11:32 AM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-20"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-20">SCRUM-20</a>
                 </td>
-                <td class="created"> 18/Nov/24 1:51 PM </td>
+                <td class="created">18/Nov/24 1:51 PM</td>
             </tr>
-
 
             <tr id="issuerow10035" rel="10035" data-issuekey="SCRUM-14" class="issuerow">
                 <td class="summary">
-                    <p>
-                        Implement a theme for UI design
-                    </p>
+                    <p>Implement a theme for UI design</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 15/Nov/24 12:16 PM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">15/Nov/24 12:16 PM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-14"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-14">SCRUM-14</a>
                 </td>
-                <td class="created"> 12/Nov/24 2:57 PM </td>
+                <td class="created">12/Nov/24 2:57 PM</td>
             </tr>
-
 
             <tr id="issuerow10033" rel="10033" data-issuekey="SCRUM-12" class="issuerow">
                 <td class="summary">
-                    <p>
-                        Figma UI design prototype
-                    </p>
+                    <p>Figma UI design prototype</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 08/Nov/24 12:31 PM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">08/Nov/24 12:31 PM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-12"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-12">SCRUM-12</a>
                 </td>
-                <td class="created"> 25/Oct/24 4:10 PM </td>
+                <td class="created">25/Oct/24 4:10 PM</td>
             </tr>
-
 
             <tr id="issuerow10030" rel="10030" data-issuekey="SCRUM-9" class="issuerow">
                 <td class="summary">
-                    <p>
-                        Find UWB beacons
-                    </p>
+                    <p>Find UWB beacons</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 25/Oct/24 11:00 AM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">25/Oct/24 11:00 AM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-9"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-9">SCRUM-9</a>
                 </td>
-                <td class="created"> 23/Oct/24 12:43 PM </td>
+                <td class="created">23/Oct/24 12:43 PM</td>
             </tr>
-
 
             <tr id="issuerow10026" rel="10026" data-issuekey="SCRUM-5" class="issuerow">
                 <td class="summary">
-                    <p>
-                        Research other solutions
-                    </p>
+                    <p>Research other solutions</p>
                 </td>
-                <td class="assignee"> Natalia Kośmider
-                </td>
-                <td class="updated"> 18/Oct/24 12:19 PM </td>
+                <td class="assignee">Natalia Kośmider</td>
+                <td class="updated">18/Oct/24 12:19 PM</td>
                 <td class="issuekey">
-
                     <a class="issue-link" data-issue-key="SCRUM-5"
                         href="https://capston-crusaders.atlassian.net/browse/SCRUM-5">SCRUM-5</a>
                 </td>
-                <td class="created"> 11/Oct/24 6:58 PM </td>
+                <td class="created">11/Oct/24 6:58 PM</td>
             </tr>
         </tbody>
     </table>
