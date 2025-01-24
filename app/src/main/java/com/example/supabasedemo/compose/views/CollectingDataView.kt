@@ -37,22 +37,34 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.math.log
 
+/**
+ * A composable view for collecting Ultra-Wideband (UWB) data measurements.
+ * Features:
+ * - Collects physical distance/angle measurements via user input
+ * - Reads UWB sensor data for distance and angle
+ * - Uses timers to coordinate data collection
+ * - Provides audio feedback via sound effects
+ * - Stores collected data via Supabase
+ */
+
 @Composable
-fun CollectingDataView (
+fun CollectingDataView(
     setState: (state: UserState) -> Unit
 ) {
-
+    // Core dependencies
     val context = LocalContext.current
     val viewModel = MainViewModel(context, setState = { setState(it) })
-
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // UWB sensor readings
     val uwbAngleReading by UwbManagerSingleton.angleReadingsFlow.collectAsState()
     val uwbDistanceReading by UwbManagerSingleton.distanceReadingsFlow.collectAsState()
 
+    // User input states
     var physicalDistance by remember { mutableStateOf("") }
     var physicalAngle by remember { mutableStateOf("") }
 
+    // Sound effect setup
     val soundPool = remember {
         SoundPool.Builder()
             .setMaxStreams(3)
@@ -65,12 +77,13 @@ fun CollectingDataView (
             .build()
     }
 
+    // Sound loading states and IDs
     var isHitSoundLoaded by remember { mutableStateOf(false) }
     var isMissSoundLoaded by remember { mutableStateOf(false) }
-
     val hitSoundId = remember { soundPool.load(context, R.raw.hit, 1) }
     val missSoundId = remember { soundPool.load(context, R.raw.miss, 1) }
 
+    // Sound loading callback
     soundPool.setOnLoadCompleteListener { _, loadedSoundId, status ->
         when {
             status == 0 && loadedSoundId == hitSoundId -> {
@@ -87,6 +100,7 @@ fun CollectingDataView (
         }
     }
 
+    // Sound playback helper
     fun playSoundForEntity(isMissClicked: Boolean) {
         if (isMissClicked) {
             if (isMissSoundLoaded) {
@@ -113,10 +127,11 @@ fun CollectingDataView (
         }
     }
 
+    // Data collection timer (10 seconds, 250ms intervals)
     val timer1 = object: CountDownTimer(10000, 250) {
         override fun onTick(millisUntilFinished: Long) {
+            // Store UWB readings with physical measurements
             viewModel.supabaseDb.createCollectingData(
-                //id,
                 physicalAngle.toFloat(),
                 physicalDistance.toFloat(),
                 uwbAngleReading.last(),
@@ -127,52 +142,49 @@ fun CollectingDataView (
         }
         override fun onFinish() {
             Log.i("collecting", "finished" )
-            playSoundForEntity(false)
-        }
-    }
-    val timer2 = object: CountDownTimer(3000, 1000) {
-        override fun onTick(millisUntilFinished: Long) {
-            Log.i("collecting", "waiting" )
-            playSoundForEntity(true)
-        }
-        override fun onFinish() {
-            timer1.start()
+            playSoundForEntity(false) // Success sound
         }
     }
 
+    // Countdown timer before data collection (3 seconds)
+    val timer2 = object: CountDownTimer(3000, 1000) {
+        override fun onTick(millisUntilFinished: Long) {
+            Log.i("collecting", "waiting" )
+            playSoundForEntity(true) // Tick sound
+        }
+        override fun onFinish() {
+            timer1.start() // Start data collection
+        }
+    }
+
+    // UI Layout
     Box(
         modifier = Modifier.border(1.dp, AppTheme.colorScheme.outline)
     ){
         Column(
-            modifier = Modifier
-                .padding(4.dp),
+            modifier = Modifier.padding(4.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
+            // Distance input field
             MyOutlinedTextField(
                 value = physicalDistance,
-                placeholder = {
-                    Text(text = "Enter measured distance")
-                },
-                onValueChange = {
-                    physicalDistance = it
-                }
+                placeholder = { Text(text = "Enter measured distance") },
+                onValueChange = { physicalDistance = it }
             )
             Spacer(modifier = Modifier.padding(8.dp))
+
+            // Angle input field
             MyOutlinedTextField(
                 value = physicalAngle,
-                placeholder = {
-                    Text(text = "Enter measured angle")
-                },
-                onValueChange = {
-                    physicalAngle = it
-                }
+                placeholder = { Text(text = "Enter measured angle") },
+                onValueChange = { physicalAngle = it }
             )
             Spacer(modifier = Modifier.padding(8.dp))
+
+            // Start collection button
             MyOutlinedButton(
-                onClick = {
-                    timer2.start()
-                }
+                onClick = { timer2.start() }
             ) { Text(text = "Start") }
         }
     }

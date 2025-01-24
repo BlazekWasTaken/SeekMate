@@ -39,6 +39,21 @@ import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.AppTheme
 import com.example.supabasedemo.ui.theme.ThemeChoice
 
+/**
+ * Main entry point for the application that handles:
+ * - Navigation setup and routing between screens
+ * - Theme management
+ * - User state management
+ * - Permission handling
+ *
+ * The navigation is structured into distinct flows:
+ * - Login flow (authentication screens)
+ * - Main menu flow (game menu, stats, tutorial)
+ * - Settings flow (account, theme, demo settings)
+ * - Game flow (actual gameplay screens)
+ */
+
+// Singleton to provide NavController access throughout the app
 object NavControllerProvider {
     @SuppressLint("StaticFieldLeak")
     lateinit var navController: NavController
@@ -47,40 +62,45 @@ object NavControllerProvider {
 class MainActivity : ComponentActivity() {
 
     companion object {
-        // Subflow (parent) routes:
-        const val ROOT_ROUTE = "root"
-        const val LOGIN_FLOW_ROUTE = "loginFlow"
-        const val MAIN_MENU_FLOW_ROUTE = "mainMenuFlow"
-        const val SETTINGS_FLOW_ROUTE = "settingsFlow"
-        const val GAME_FLOW_ROUTE = "gameFlow"
+        // Routes are organized by navigation flows for better organization
 
-        // Auth child routes:
-        const val LOGIN_CHOICE_ROUTE = "loginChoice"
-        const val LOGIN_ROUTE = "login"
-        const val SIGNUP_ROUTE = "signup"
+        // Parent route containers that group related screens
+        const val ROOT_ROUTE = "root"               // Top-level container
+        const val LOGIN_FLOW_ROUTE = "loginFlow"    // Authentication flow
+        const val MAIN_MENU_FLOW_ROUTE = "mainMenuFlow" // Main app navigation
+        const val SETTINGS_FLOW_ROUTE = "settingsFlow"  // Settings screens
+        const val GAME_FLOW_ROUTE = "gameFlow"      // Active gameplay screens
 
-        // Main menu child routes:
-        const val MENU_ROUTE = "menu"
-        const val STATS_ROUTE = "stats"
-        const val TUTORIAL_ROUTE = "tutorial"
-        const val MINI_GAME_ROUTE_STATIC = "minigameStatic"
-        const val END_GAME_ROUTE = "endGame"
+        // Authentication screen routes
+        const val LOGIN_CHOICE_ROUTE = "loginChoice"  // Initial auth choice
+        const val LOGIN_ROUTE = "login"              // Login form
+        const val SIGNUP_ROUTE = "signup"            // Registration form
 
-        // Settings child routes:
-        const val SETTINGS_MENU_ROUTE = "settingsMenu"
-        const val ACCOUNT_INFO_ROUTE = "accountInfo"
-        const val THEME_ROUTE = "theme"
-        const val DEMO_ROUTE = "demo"
+        // Main menu screen routes
+        const val MENU_ROUTE = "menu"               // Main menu
+        const val STATS_ROUTE = "stats"             // Statistics display
+        const val TUTORIAL_ROUTE = "tutorial"       // Game tutorial
+        const val MINI_GAME_ROUTE_STATIC = "minigameStatic" // Practice mini-game
+        const val END_GAME_ROUTE = "endGame"        // Game over screen
 
-        // Game child routes:
-        const val GAME_START_ROUTE = "gameStart"
+        // Settings screen routes
+        const val SETTINGS_MENU_ROUTE = "settingsMenu"  // Settings main menu
+        const val ACCOUNT_INFO_ROUTE = "accountInfo"    // Account details
+        const val THEME_ROUTE = "theme"                 // Theme customization
+        const val DEMO_ROUTE = "demo"                   // Demo/testing features
 
-        // Shared composables that need parameters:
-        const val MINIGAME_ROUTE = "minigame/{round}/{gameUuid}/{isController}"
-        const val WAITING_ROUTE = "waiting/{gameUuid}/{round}/{score}/{isController}"
+        // Active gameplay routes
+        const val GAME_START_ROUTE = "gameStart"    // New game setup
+
+        // Parameterized routes that can be accessed from multiple flows
+        const val MINIGAME_ROUTE = "minigame/{round}/{gameUuid}/{isController}" // Active minigame
+        const val WAITING_ROUTE = "waiting/{gameUuid}/{round}/{score}/{isController}" // Loading/transition
     }
 
+    // Permission code for camera access
     private val permissionRequestCode = 101
+
+    // State management
     private val _userState = mutableStateOf<UserState>(UserState.InLoginChoice)
     private val _theme = mutableStateOf<ThemeChoice>(ThemeChoice.System)
     private lateinit var viewModel: MainViewModel
@@ -103,8 +123,9 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Top-level NavHost using a ROOT_ROUTE as the single startDestination;
-     * each subflow is defined inside as a separate navigation() block.
+     * Defines the complete navigation graph for the application.
+     * Organized into separate flows for authentication, main menu, settings, and gameplay.
+     * Each flow has its own navigation() block with composable destinations.
      */
     @Composable
     private fun Navigation() {
@@ -343,10 +364,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Updates the user state and triggers UI updates
+     */
     private fun setState(state: UserState) {
         _userState.value = state
     }
 
+    /**
+     * Handles runtime permission requests for camera access
+     */
     override fun onStart() {
         super.onStart()
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)

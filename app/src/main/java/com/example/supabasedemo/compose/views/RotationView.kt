@@ -18,12 +18,25 @@ import com.example.supabasedemo.data.network.SensorManagerSingleton
 import com.example.supabasedemo.ui.theme.AppTheme
 import java.util.Locale
 
+/**
+ * Provides a compass-style rotation display that shows device orientation.
+ * Uses device sensors to track azimuth (rotation around vertical axis).
+ */
+
+/**
+ * A composable that displays the current device rotation angle.
+ * Shows azimuth value in degrees within a bordered box.
+ *
+ * @param context Android context needed for sensor access
+ */
 @Composable
 fun RotationView(
     context: Context,
 ) {
+    // Collect rotation sensor readings as state
     val rotationReading by SensorManagerSingleton.compassReadingsFlow.collectAsState()
 
+    // Initialize sensors when view is first composed
     LaunchedEffect(Unit) {
         SensorManagerSingleton.initialize(context)
     }
@@ -43,6 +56,12 @@ fun RotationView(
     }
 }
 
+/**
+ * Formats rotation angle for display.
+ * Adds degree symbol and leading space for positive values.
+ *
+ * @return Formatted string with degree symbol
+ */
 private fun Float.fixForScreen(): String {
     return if (this < 0) {
         String.format(Locale.getDefault(), "%.0f", this) + "\u00B0"

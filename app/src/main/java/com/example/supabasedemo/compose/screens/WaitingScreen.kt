@@ -39,34 +39,48 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.internal.wait
 
+/**
+ * WaitingScreen is an intermediate game state screen that:
+ * - Displays current game progress (score and round)
+ * - Handles hint system mechanics
+ * - Monitors UWB distance between players
+ * - Determines game end conditions
+ * - Prevents back navigation during active gameplay
+ */
 @Composable
 fun WaitingScreen(
-    onNavigateToEndGame: () -> Unit,
-    getState: () -> MutableState<UserState>,
-    setState: (UserState) -> Unit,
-    getEndTime: () -> Int,
-    gameUuid: String,
-    viewModel: MainViewModel
+    onNavigateToEndGame: () -> Unit,      // Callback to navigate to end game screen
+    getState: () -> MutableState<UserState>, // Get current user state
+    setState: (UserState) -> Unit,        // Update user state
+    getEndTime: () -> Int,                // Get game end timestamp
+    gameUuid: String,                     // Unique game identifier
+    viewModel: MainViewModel              // Main app ViewModel
 ) {
+    // Prevent back navigation during gameplay
     val activity = LocalActivity.current
-
     BackHandler {
         activity?.moveTaskToBack(true)
     }
 
+    // Monitor UWB distance between players
     val uwbDistance by UwbManagerSingleton.distanceReadingsFlow.collectAsState()
 
+    // Game state tracking
     val userState = getState().value
     val directionId: Int by remember { mutableIntStateOf(0) }
 
+    // Hint system state
     var notEnoughHints: Boolean by remember { mutableStateOf(false) }
     var isHintVisible: Boolean by remember { mutableStateOf(false) }
     var wait: Boolean by remember { mutableStateOf(false) }
 
+    // Track game end time updates
     var endTimeSubscription by remember { mutableStateOf<String?>(null) }
 
+    // Validate user state
     if (userState !is UserState.InWaitingScreen) return
 
+    // Subscribe to game end time updates
     LaunchedEffect(Unit) {
         viewModel.supabaseRealtime.subscribeToEndTime(
             uuid = gameUuid,
@@ -126,6 +140,8 @@ fun WaitingScreen(
             }
         }
     }
+    // Game end conditions:
+    // 1. Controller is within 1m range for 10 consecutive readings
     if (uwbDistance.takeLast(10).count {it < 1} == 10 && (userState.round%2 == 0)) {
         viewModel.supabaseDb.updateEndTime(
             gameUuid,
@@ -146,6 +162,7 @@ fun WaitingScreen(
             onNavigateToEndGame()
         }
     }
+    // 2. End time received from server
     if (endTimeSubscription != null) {
         // TODO: This user lost
         LaunchedEffect(Unit) {

@@ -20,6 +20,20 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
+
+/**
+ * Theme configuration for the application.
+ * Provides:
+ * - Light/dark color schemes
+ * - Typography settings
+ * - Custom shape definitions
+ * - Themed components
+ * - Theme selection system
+ */
+
+/**
+ * Light theme color scheme defining all Material3 color slots
+ */
 private val lightColorScheme = lightColorScheme(
     background = Background,
     onBackground = OnBackground,
@@ -59,6 +73,9 @@ private val lightColorScheme = lightColorScheme(
     outlineVariant = OutlineVariant,
 )
 
+/**
+ * Dark theme color scheme defining all Material3 color slots
+ */
 private val darkColorScheme = darkColorScheme(
     background = BackgroundD,
     onBackground = OnBackgroundD,
@@ -98,6 +115,9 @@ private val darkColorScheme = darkColorScheme(
     outlineVariant = OutlineVariantD,
 )
 
+/**
+ * Application typography configuration using Material3 text styles
+ */
 private val typography = Typography(
     titleLarge = Typography.titleLarge,
     titleSmall = Typography.titleSmall,
@@ -107,6 +127,9 @@ private val typography = Typography(
     labelSmall = Typography.labelSmall
 )
 
+/**
+ * Custom shape definitions using rectangular corners
+ */
 val replyShapes = Shapes(
     extraSmall = RoundedCornerShape(0),
     small = RoundedCornerShape(0),
@@ -115,6 +138,12 @@ val replyShapes = Shapes(
     extraLarge = RoundedCornerShape(0)
 )
 
+/**
+ * Main theme wrapper composable that applies color scheme, typography and shapes.
+ * @param getThemeChoice Function to get current theme choice (Light/Dark/System)
+ * @param isDarkTheme Current system dark mode state
+ * @param content Content to be themed
+ */
 @Composable
 fun AppTheme(
     getThemeChoice: () -> ThemeChoice,
@@ -142,12 +171,18 @@ fun AppTheme(
     )
 }
 
+/**
+ * Theme choice options for the application
+ */
 sealed class ThemeChoice {
     data object Light: ThemeChoice()
     data object Dark: ThemeChoice()
     data object System: ThemeChoice()
 }
 
+/**
+ * Themed outlined button with rectangular shape and custom border
+ */
 @Composable
 fun MyOutlinedButton(
     onClick: () -> Unit,
@@ -161,7 +196,9 @@ fun MyOutlinedButton(
     )
 }
 
-//do the same for outlined text field
+/**
+ * Themed outlined text field with rectangular shape and custom colors
+ */
 @Composable
 fun MyOutlinedTextField(
     value: String,
@@ -185,6 +222,9 @@ fun MyOutlinedTextField(
     )
 }
 
+/**
+ * Static access to theme properties throughout the app
+ */
 object AppTheme {
     val colorScheme: ColorScheme @Composable get() = MaterialTheme.colorScheme
     val typography: Typography @Composable get() = MaterialTheme.typography

@@ -12,12 +12,28 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 import kotlin.math.absoluteValue
 
+/**
+ * Manages device sensor access and readings for motion detection and orientation.
+ * Provides access to:
+ * - Linear accelerometer
+ * - Accelerometer
+ * - Gyroscope
+ * - Magnetometer
+ * - Gravity sensor
+ * - Compass/orientation
+ *
+ * All sensor readings are exposed as StateFlows for reactive updates.
+ */
+
 object SensorManagerSingleton {
+    // System sensor manager instance
     private var sensorManager: SensorManager? = null
 
+    // Initialization state tracking
     private var isStarted: Boolean = false
     private val _isStartedFlow = MutableStateFlow(false)
 
+    /** StateFlows exposing sensor readings */
     private val _linearAccelerometerReadingsFlow = MutableStateFlow(listOf(Reading(0F, 0F, 0F)))
     val linearAccelerometerReadingsFlow: StateFlow<List<Reading>> get() = _linearAccelerometerReadingsFlow
 
@@ -38,6 +54,11 @@ object SensorManagerSingleton {
 
     private var initializationDeferred: CompletableDeferred<Unit>? = null
 
+    /**
+     * Initializes the sensor manager and starts all sensor listeners.
+     * Will only initialize once - subsequent calls are ignored.
+     * @param context Android context required for system service access
+     */
     fun initialize(context: Context) {
         if (isStarted || _isStartedFlow.value) return
         sensorManager = getSystemService(context, SensorManager::class.java) as SensorManager
@@ -180,12 +201,20 @@ object SensorManagerSingleton {
     }
 }
 
+/**
+ * Data class representing a 3D sensor reading with x, y, z coordinates
+ */
 class Reading(
     var x: Float,
     var y: Float,
     var z: Float,
 )
 
+/** Utility Functions */
+
+/**
+ * Formats float values for display, adding padding for positive numbers
+ */
 fun Float.fixForScreen(): String {
     return if (this < 0) {
         String.format(Locale.getDefault(), "%.3f", this)
@@ -195,6 +224,9 @@ fun Float.fixForScreen(): String {
     }
 }
 
+/**
+ * Calculates average values from a list of Reading objects
+ */
 fun List<Reading>.avg(): Reading {
     var value: Reading = Reading(0F, 0F, 0F)
     for (aa in this) {
@@ -210,10 +242,18 @@ fun List<Reading>.avg(): Reading {
     return value
 }
 
+/**
+ * Calculates percentage position of x between values a and b
+ */
 fun percentageBetween(a: Float, b: Float, x: Float): Float {
     return (x - a) / (b - a)
 }
 
+/**
+ * Calculates forward acceleration by combining gravity and accelerometer data.
+ * Uses running average of last 20 accelerometer readings for smoothing.
+ * @return Forward acceleration in m/s²
+ */
 fun getForwardAcceleration(): Float {
     var gravity: Reading = SensorManagerSingleton.gravityReadingsFlow.value.last()
     var acceleration: Reading = SensorManagerSingleton.accelerometerReadingsFlow.value.takeLast(20).avg()

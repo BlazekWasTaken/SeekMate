@@ -19,18 +19,33 @@ import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 
+/**
+ * Main menu screen that serves as the central hub for navigation.
+ * Provides access to:
+ * - Game start
+ * - Tutorial
+ * - Settings
+ * - Statistics
+ * - Mini-game practice
+ * - Logout
+ *
+ * Handles back press by minimizing app rather than navigating back.
+ */
 @Composable
 fun MainMenuScreen(
-    onNavigateToLoginChoice: () -> Unit,
-    onNavigateToGame: () -> Unit,
-    onNavigateToTutorial: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToStats: () -> Unit,
-    onNavigateToMiniGame: () -> Unit,
-    onNavigateToEndGame: () -> Unit,
-    getState: () -> MutableState<UserState>,
-    setState: (state: UserState) -> Unit
+    // Navigation callbacks
+    onNavigateToLoginChoice: () -> Unit,    // Called after logout
+    onNavigateToGame: () -> Unit,           // Start new game
+    onNavigateToTutorial: () -> Unit,       // Show tutorial
+    onNavigateToSettings: () -> Unit,       // Open settings
+    onNavigateToStats: () -> Unit,          // Show statistics
+    onNavigateToMiniGame: () -> Unit,       // Practice mode
+    onNavigateToEndGame: () -> Unit,        // Game completion
+    // State management
+    getState: () -> MutableState<UserState>, // Current app state
+    setState: (state: UserState) -> Unit     // Update app state
 ) {
+    // Minimize app on back press instead of navigation
     val activity = LocalActivity.current
     BackHandler {
         activity?.moveTaskToBack(true)
@@ -38,10 +53,12 @@ fun MainMenuScreen(
 
     val viewModel = MainViewModel(LocalContext.current, setState = { setState(it) })
 
+    // Initialize screen state
     LaunchedEffect(Unit) {
         setState(UserState.InMainMenu)
     }
 
+    // Main menu button layout
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,6 +114,7 @@ fun MainMenuScreen(
         }
     }
 
+    // Handle state transitions
     val userState = getState().value
     when (userState) {
         is UserState.Logout -> {

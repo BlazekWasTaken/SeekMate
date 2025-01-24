@@ -19,10 +19,27 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * Helper class for interacting with Supabase database.
+ * Handles:
+ * - Game CRUD operations
+ * - Player statistics tracking
+ * - Direction and sensor data collection
+ * - Error handling and state management
+ */
+
 class SupabaseDbHelper(
     private val scope: CoroutineScope,
     val setState: (UserState) -> Unit,
 ) {
+    // ----- Game Query Operations -----
+
+    /**
+     * Retrieves all finished games where user was player 1
+     * @param currentUser The authenticated user's data
+     * @param onError Callback for error handling
+     * @return List of completed games
+     */
     fun getFinishedUser1Games(
         currentUser: JsonObject?,
         onError: (String) -> Unit
@@ -45,6 +62,9 @@ class SupabaseDbHelper(
         return games
     }
 
+    /**
+     * Retrieves all finished games where user was player 2
+     */
     fun getFinishedUser2Games(
         currentUser: JsonObject?,
         onError: (String) -> Unit
@@ -68,6 +88,9 @@ class SupabaseDbHelper(
         return games
     }
 
+    /**
+     * Gets the most recently completed game for a user
+     */
     fun getLastFinishedUserGame(
         currentUser: JsonObject?,
         onError: (String) -> Unit
@@ -94,6 +117,11 @@ class SupabaseDbHelper(
         return game
     }
 
+    // ----- Game Update Operations -----
+
+    /**
+     * Updates the current round number for an active game
+     */
     fun updateRoundNumber(
         gameUuid: String,
         newRound: Int,
@@ -117,6 +145,9 @@ class SupabaseDbHelper(
         }
     }
 
+    /**
+     * Sets the completion time when a game ends
+     */
     fun updateEndTime(
         gameUuid: String,
         onError: (String) -> Unit
@@ -137,6 +168,9 @@ class SupabaseDbHelper(
         }
     }
 
+    /**
+     * Records the winner of a completed game
+     */
     fun updateWinner(
         gameUuid: String,
         didUser1Win: Boolean,
@@ -158,6 +192,9 @@ class SupabaseDbHelper(
         }
     }
 
+    /**
+     * Allows a second player to join an existing game
+     */
     fun joinGameInSupabase(
         gameUuid: String,
         onGameJoined: (Game) -> Unit,
@@ -190,6 +227,9 @@ class SupabaseDbHelper(
         }
     }
 
+    /**
+     * Creates a new game instance in the database
+     */
     fun createGameInSupabase(
         gameUuid: String,
         onGameCreated: (Game) -> Unit,
@@ -224,6 +264,11 @@ class SupabaseDbHelper(
         return gameData
     }
 
+    // ----- Sensor Data Collection -----
+
+    /**
+     * Creates a new direction measurement record
+     */
     fun createDirection (a: Int) {
         val b = DirectionRecord(a, 0F)
         runBlocking {
@@ -234,6 +279,9 @@ class SupabaseDbHelper(
         }
     }
 
+    /**
+     * Updates a direction measurement
+     */
     fun sendDirection (id: Int, direction: Float) {
         runBlocking {
             try {
@@ -252,6 +300,9 @@ class SupabaseDbHelper(
         }
     }
 
+    /**
+     * Records physical and UWB sensor measurements
+     */
     fun createCollectingData(
 //        id: Int,
         physicalAngle: Float,
@@ -284,12 +335,18 @@ class SupabaseDbHelper(
     }
 }
 
+/**
+ * Data class representing a direction measurement
+ */
 @Serializable
 class DirectionRecord (
     val id: Int,
     val direction: Float
 )
 
+/**
+ * Data class for storing sensor measurement comparisons
+ */
 @Serializable
 class DataRecord (
 //    val id: Int,

@@ -24,14 +24,27 @@ import com.example.supabasedemo.ui.theme.AppTheme
 import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.example.supabasedemo.ui.theme.Typography
 
+/**
+ * Tutorial screen that explains game rules and mechanics to players.
+ * Contains detailed instructions for:
+ * - Game setup and QR code functionality
+ * - Round structure and timing
+ * - Player roles (Seeker/Hider)
+ * - Mini-game mechanics and scoring
+ * - Win conditions
+ */
+
 @Composable
 fun TutorialScreen(
-    onNavigateToMainMenu: () -> Unit,
-    setState: (state: UserState) -> Unit
+    onNavigateToMainMenu: () -> Unit,  // Callback to return to main menu
+    setState: (state: UserState) -> Unit  // Updates global user state
 ){
+    // Set user state when entering tutorial
     LaunchedEffect(Unit) {
         setState(UserState.InTutorial)
     }
+
+    // Main layout container
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,11 +52,14 @@ fun TutorialScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        // Screen title
         Text(
             text = "How to play?",
             style = Typography.titleLarge
         )
         Spacer(modifier = Modifier.padding(12.dp))
+
+        // Scrollable tutorial content container
         Box(
             modifier = Modifier
                 .border(1.dp, AppTheme.colorScheme.outline, RectangleShape)
@@ -57,9 +73,9 @@ fun TutorialScreen(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
             ) {
+                // Game setup instructions
                 Column(
-                    modifier = Modifier
-                        .padding(8.dp),
+                    modifier = Modifier.padding(8.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -103,6 +119,7 @@ fun TutorialScreen(
                         softWrap = true
                     )
                 }
+                // Mini-game section
                 Spacer(modifier = Modifier.padding(6.dp))
                 Column(
                     modifier = Modifier
@@ -117,6 +134,7 @@ fun TutorialScreen(
                     )
                 }
                 Spacer(modifier = Modifier.padding(4.dp))
+                // Mini-game mechanics explanation
                 Column(
                     modifier = Modifier
                         .padding(8.dp),
@@ -139,6 +157,7 @@ fun TutorialScreen(
             }
         }
 
+        // Handle back button press
         BackHandler {
             setState(UserState.InMainMenu)
             onNavigateToMainMenu()
