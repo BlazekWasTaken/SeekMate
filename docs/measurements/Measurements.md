@@ -71,7 +71,8 @@ Devices:
 -  **OBI measuring tape**: an extendable 5 m measuring tape, with accuracy class II (II klasa dokładności)
 -  **3D printed cube**: for placing phones, photographed below
   ![The cube]()
-  ![The measuring setup]()
+- **The measuring setup**:
+  ![The measuring setup](./20250124_121218.jpg)
 
 
 ## Final Notes:
