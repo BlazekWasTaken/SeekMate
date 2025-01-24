@@ -50,37 +50,55 @@ import com.example.supabasedemo.ui.theme.MyOutlinedButton
 import com.example.supabasedemo.ui.theme.MyOutlinedTextField
 import kotlin.random.Random
 
+/**
+ * Demo screen for testing UWB (Ultra-wideband) functionality and sensor data.
+ * Features:
+ * - UWB connection management (controller/responder roles)
+ * - Device pairing via address/preamble
+ * - Sensor data visualization (accelerometer, gyroscope, rotation)
+ * - Direction indicators
+ * - Data collection controls
+ */
+
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun UwbScreen(
+    // Navigate back to settings screen
     onNavigateToSettings: () -> Unit,
+    // Update global app state
     setState: (state: UserState) -> Unit
 ) {
+    // Initialize screen state
     LaunchedEffect(Unit) {
         setState(UserState.InDemo)
     }
 
+    // Core state management
     val context = LocalContext.current
     val viewModel = MainViewModel(context, setState = { setState(it) })
 
-    var isController by remember { mutableStateOf(true) }
-
+    // UWB connection state
+    var isController by remember { mutableStateOf(true) }  // Toggle between controller/responder
     val isStarted by UwbManagerSingleton.isStartedFlow.collectAsState(initial = false)
-    var address by remember { mutableStateOf("") }
-    var preamble by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }         // Partner device address
+    var preamble by remember { mutableStateOf("") }        // Connection preamble
     val deviceAddress by UwbManagerSingleton.address.collectAsState(initial = "-1")
     val devicePreamble by UwbManagerSingleton.preamble.collectAsState(initial = "-1")
 
+    // Direction tracking
     var directionId: Int by remember { mutableIntStateOf(0) }
 
+    // Permission management
     var permissionGranted by remember { mutableStateOf(false) }
 
+    // Initialize UWB and check permissions
     LaunchedEffect(Unit) {
         if(!isStarted){
             UwbManagerSingleton.initialize(context, isController)
         }
         directionId = Random.nextInt(0, 1000)
 
+        // Request UWB permissions if needed
         permissionGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.UWB_RANGING
         ) == PackageManager.PERMISSION_GRANTED
@@ -93,6 +111,7 @@ fun UwbScreen(
         UwbManagerSingleton.fetchDeviceDetails()
     }
 
+    // Main UI container
     Box(
         modifier = Modifier
             .border(1.dp, AppTheme.colorScheme.outline, RectangleShape)
@@ -107,6 +126,7 @@ fun UwbScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Role selection UI
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -119,6 +139,7 @@ fun UwbScreen(
                     UwbManagerSingleton.stopSession()
                 })
             }
+            // Connection setup UI
             MyOutlinedTextField(
                 value = address,
                 onValueChange = { address = it },
@@ -143,12 +164,14 @@ fun UwbScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
+            // Device info display
             Spacer(modifier = Modifier.padding(8.dp))
             Text(text = "Your Device Address: $deviceAddress")
             if (isController) {
                 Text(text = "Your Preamble: $devicePreamble")
                 Text(text = "Your directionId: $directionId")
             }
+            // Session controls
             Spacer(modifier = Modifier.padding(8.dp))
             if (!isStarted) {
                 MyOutlinedButton(onClick = {
@@ -174,15 +197,18 @@ fun UwbScreen(
             CollectingDataView(
                 setState = setState
             )
+            // Sensor data displays
             Spacer(modifier = Modifier.padding(24.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
+                // UWB and Gyroscope data
                 UwbDataView()
                 Spacer(modifier = Modifier.padding(8.dp))
                 GyroscopeView(context)
             }
+            // Additional sensor displays
             Spacer(modifier = Modifier.padding(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -193,9 +219,11 @@ fun UwbScreen(
                 RotationView(context)
             }
             Spacer(modifier = Modifier.padding(8.dp))
+            // Direction indicator
             ArrowView()
             Spacer(modifier = Modifier.padding(8.dp))
 
+            // Navigation handling
             BackHandler {
                 setState(UserState.InSettings)
                 onNavigateToSettings()

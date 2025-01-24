@@ -24,35 +24,52 @@ import kotlinx.coroutines.runBlocking
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-object UwbManagerSingleton {
+/**
+ * Manages Ultra-Wideband (UWB) communication between devices for precise distance and angle measurements.
+ *
+ * Key components:
+ * - UwbManagerSingleton: Handles UWB session management and data collection
+ * - State management for distance/angle readings and device roles
+ * - Coroutine-based session handling and data updates
+ *
+ * Usage:
+ * 1. Initialize with context and controller/controlee role
+ * 2. Start session with partner device address and preamble
+ * 3. Collect distance/angle measurements via StateFlows
+ * 4. Stop session when finished
+ */
 
+object UwbManagerSingleton {
+    // Core UWB components
     private var uwbManager: UwbManager? = null
     private var sessionScope: UwbClientSessionScope? = null
-    var isController: Boolean = true
     private var sessionJob: Job? = null
+    private var initializationDeferred: CompletableDeferred<Unit>? = null
 
+    // Role management
+    var isController: Boolean = true
+    private var _isFront: Boolean = !isController
+
+    // Session state
     private var isStarted: Boolean = false
     private val _isStartedFlow = MutableStateFlow(false)
     val isStartedFlow: StateFlow<Boolean> = _isStartedFlow
 
+    // Device identification
     private val _address = MutableStateFlow("-2")
     val address: StateFlow<String> get() = _address
     private val _preamble = MutableStateFlow("-2")
     val preamble: StateFlow<String> get() = _preamble
 
+    // Measurement data
     private val _distance = MutableStateFlow(-1F)
     val distance: StateFlow<Float> get() = _distance
-
     private val _azimuth = MutableStateFlow(-1F)
     val azimuth: StateFlow<Float> get() = _azimuth
 
-    private var _isFront: Boolean = !isController
-
-    private var initializationDeferred: CompletableDeferred<Unit>? = null
-
+    // Measurement history
     private val _distanceReadingsFlow = MutableStateFlow(listOf(0F))
     val distanceReadingsFlow: StateFlow<List<Float>> get() = _distanceReadingsFlow
-
     private val _angleReadingsFlow = MutableStateFlow(listOf(0F))
     val angleReadingsFlow: StateFlow<List<Float>> get() = _angleReadingsFlow
 
@@ -227,6 +244,10 @@ object UwbManagerSingleton {
     }
 }
 
+/**
+ * Calculate standard deviation of a list of measurements
+ * @return Float representing the standard deviation
+ */
 fun List<Float>.stDev(): Float {
     var result = 0F
     for (value in this) {
@@ -237,6 +258,12 @@ fun List<Float>.stDev(): Float {
     return result
 }
 
+/**
+ * Filter values within an inclusive range
+ * @param lowInclusive Lower bound (inclusive)
+ * @param highInclusive Upper bound (inclusive)
+ * @return List of values within the specified range
+ */
 fun List<Float>.between(lowInclusive: Double, highInclusive: Double): List<Float> {
     val result: ArrayList<Float> = ArrayList()
     for (value in this) {

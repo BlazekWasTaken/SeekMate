@@ -59,13 +59,25 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 
 
+/**
+ * A whack-a-mole style minigame where players:
+ * - Tap stars to gain points
+ * - Avoid bombs and dynamite that decrease score
+ * - Must keep device still (detected via accelerometer)
+ * - Complete within time limit
+ *
+ * Game gets progressively harder with more obstacles appearing over time.
+ */
+
+// Data structure for animated "bomb" obstacles
 data class RedCircle(
-    val id: Int,
-    val offsetX: Animatable<Float, *> = Animatable(0f),
-    val offsetY: Animatable<Float, *> = Animatable(0f),
-    var isVisible: Boolean = false
+    val id: Int,                                    // Unique identifier
+    val offsetX: Animatable<Float, *> = Animatable(0f), // X position animation
+    val offsetY: Animatable<Float, *> = Animatable(0f), // Y position animation
+    var isVisible: Boolean = false                  // Visibility state
 )
 
+// Data structure for animated "dynamite" obstacles
 data class GreenSquare(
     val id: Int,
     val offsetX: Animatable<Float, *> = Animatable(0f),
@@ -73,15 +85,16 @@ data class GreenSquare(
     var isVisible: Boolean = false
 )
 
+// Helper to convert dp to pixels
 val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()
 
 @Composable
 fun MinigameScreen(
-    onNavigateToEndGame: () -> Unit,
-    setState: (state: UserState) -> Unit,
-    round: Int = 0,
-    gameUuid: String,
-    viewModel: MainViewModel
+    onNavigateToEndGame: () -> Unit,     // Callback to end game navigation
+    setState: (state: UserState) -> Unit, // Updates app state
+    round: Int = 0,                      // Current game round
+    gameUuid: String,                    // Unique game identifier
+    viewModel: MainViewModel             // Shared view model
 ) {
     val activity = LocalActivity.current
 
@@ -93,11 +106,13 @@ fun MinigameScreen(
         setState(UserState.InMiniGame)
     }
 
+    // --- Movement Detection System ---
     var isMoving by remember { mutableStateOf(false) }
     var latestSensorRead by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     val context = LocalContext.current
 
+    // --- Sound Effect System ---
     val soundPool = remember {
         SoundPool.Builder()
             .setMaxStreams(3)
@@ -158,7 +173,7 @@ fun MinigameScreen(
         }
     }
 
-
+    // --- Timer System ---
     val totalTime = 30
     var timeLeft by remember { mutableIntStateOf(totalTime) }
 
@@ -278,6 +293,7 @@ fun MinigameScreen(
         }
     }
 
+    // --- Animation System ---
     val circleSize = 50.dp
     val density = LocalDensity.current
     val animationDuration = 1000
@@ -289,6 +305,7 @@ fun MinigameScreen(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
+        // Game area layout
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -307,6 +324,7 @@ fun MinigameScreen(
                 modifier = Modifier.padding(8.dp)
             )
 
+            // Calculate game area boundaries
             BoxWithConstraints(
                 modifier = Modifier
                     .weight(1f)
@@ -341,6 +359,7 @@ fun MinigameScreen(
 
                 var cycleCount by remember { mutableIntStateOf(0) }
 
+                // Main animation loop
                 LaunchedEffect(key1 = "AnimationLoop") {
                     println("Animation loop started")
                     while (true) {

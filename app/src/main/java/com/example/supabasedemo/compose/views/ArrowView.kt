@@ -25,18 +25,33 @@ import com.example.supabasedemo.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 import kotlin.math.sqrt
 
+/**
+ * Provides a visual direction indicator using UWB (Ultra-Wideband) angle data.
+ * This component displays either:
+ * - An arrow pointing in the direction of another UWB device
+ * - A "Behind you" message when angle variations indicate target is behind user
+ */
+
+/**
+ * Displays a directional arrow that rotates based on UWB angle measurements.
+ * Uses a rolling window of angle measurements to determine stability and position.
+ */
 @Composable
 fun ArrowView() {
+    // Get current UWB angle from singleton manager
     val uwbAngle by UwbManagerSingleton.azimuth.collectAsState()
 
+    // Maintain history of last 10 angle measurements to detect stability
     val angleHistory = remember { mutableStateListOf<Float>() }
     LaunchedEffect(uwbAngle) {
         angleHistory.add(uwbAngle)
         if (angleHistory.size > 10) angleHistory.removeAt(0)
-        delay(500)
+        delay(500) // Sample every 500ms
     }
+
+    // Calculate angle variation to detect if target is behind user
     val angleStdDev = computeStandardDeviation(angleHistory)
-    val stdThreshold = 30.0f;
+    val stdThreshold = 30.0f // Threshold for considering angle unstable
 
     Box(
         modifier = Modifier
@@ -44,9 +59,11 @@ fun ArrowView() {
             .size(150.dp, 150.dp)
     ) {
         if (angleStdDev > stdThreshold) {
+            // High angle variation indicates target is behind user
             Log.i("Arrow", "Std: ${angleStdDev} greater than threshold: ${stdThreshold}. Showing behind you message")
             Text(text = "Behind you")
         } else {
+            // Stable angle measurement - show rotating arrow
             Log.i("Arrow", "Std: ${angleStdDev} less than threshold: ${stdThreshold}. Showing arrow")
             Image(
                 painter = painterResource(R.drawable.arrow),
@@ -60,6 +77,13 @@ fun ArrowView() {
     }
 }
 
+/**
+ * Calculates the standard deviation of a list of angle measurements.
+ * Used to determine stability of UWB angle readings.
+ *
+ * @param values List of angle measurements in degrees
+ * @return Standard deviation of the angles, or 0 if list is empty
+ */
 fun computeStandardDeviation(values: List<Float>): Float {
     if (values.isEmpty()) return 0f
     val mean = values.average().toFloat()

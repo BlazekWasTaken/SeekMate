@@ -15,11 +15,33 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
+/**
+ * Helper class to manage Supabase authentication operations including:
+ * - User signup/login/logout
+ * - Session management
+ * - Token storage
+ * - Login state tracking
+ *
+ * Requires:
+ * - Supabase client configuration
+ * - CoroutineScope for async operations
+ * - Context for shared preferences access
+ */
+
 class SupabaseAuthHelper(
     private val scope: CoroutineScope,
     val setState: (UserState) -> Unit,
     private val context: Context
 ) {
+    // --- Authentication Operations ---
+
+    /**
+     * Creates a new user account with email/password
+     * @param userEmail User's email address
+     * @param userPassword User's password
+     * @param username Display name for the user
+     * Updates state with loading/success/error
+     */
     fun signUp(userEmail: String, userPassword: String, username: String) {
         scope.launch {
             try {
@@ -40,6 +62,11 @@ class SupabaseAuthHelper(
         }
     }
 
+    // --- Token Management ---
+
+    /**
+     * Stores the current access token in SharedPreferences
+     */
     private fun saveToken() {
         scope.launch {
             val accessToken = client.auth.currentAccessTokenOrNull()
@@ -48,11 +75,21 @@ class SupabaseAuthHelper(
         }
     }
 
+    /**
+     * Retrieves stored access token
+     * @return Stored token or null if not found
+     */
     private fun getToken(): String? {
         val sharedPref = SharedPreferenceHelper(context)
         return sharedPref.getStringData("accessToken")
     }
 
+    /**
+     * Authenticates existing user with email/password
+     * @param userEmail User's email address
+     * @param userPassword User's password
+     * Updates state with loading/success/error
+     */
     fun login(userEmail: String, userPassword: String) {
         scope.launch {
             try {
@@ -69,6 +106,10 @@ class SupabaseAuthHelper(
         }
     }
 
+    /**
+     * Signs out current user and clears stored credentials
+     * Updates state with loading/success/error
+     */
     fun logout() {
         val sharedPref = SharedPreferenceHelper(context)
         scope.launch {
@@ -83,6 +124,13 @@ class SupabaseAuthHelper(
         }
     }
 
+    // --- Session Status ---
+
+    /**
+     * Checks if user has valid session
+     * Attempts token refresh if session exists
+     * Updates state with current login status
+     */
     fun isUserLoggedIn() {
         scope.launch {
             try {
@@ -102,12 +150,21 @@ class SupabaseAuthHelper(
         }
     }
 
+    /**
+     * Gets current user's metadata if logged in
+     * @return User metadata as JsonObject or null if not logged in
+     */
     fun getCurrentUser(): JsonObject? {
         val user = client.auth.currentUserOrNull()
         val metadata = user?.userMetadata
         return metadata
     }
 
+    /**
+     * Gets complete user info for current session
+     * @return UserInfo object containing profile data
+     * @throws Exception if no active session exists
+     */
     fun getCurrentUserInfo(): UserInfo {
         return runBlocking {
             return@runBlocking client.auth.retrieveUserForCurrentSession(false)

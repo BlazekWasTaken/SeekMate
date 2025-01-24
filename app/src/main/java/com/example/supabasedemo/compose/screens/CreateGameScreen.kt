@@ -45,44 +45,63 @@ import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.util.UUID
 
+/**
+ * Screen for creating or joining a game session.
+ * Handles:
+ * - Game creation with QR code generation
+ * - QR code scanning to join games
+ * - UWB device setup and permissions
+ * - Real-time game state updates
+ */
+
 @Composable
 fun CreateGameScreen(
-    getState: () -> MutableState<UserState>,
-    onNavigateToMainMenu: () -> Unit,
-    setState: (state: UserState) -> Unit
+    getState: () -> MutableState<UserState>,     // Provides current app state
+    onNavigateToMainMenu: () -> Unit,            // Navigation callback
+    setState: (state: UserState) -> Unit         // Updates app state
 ) {
+    // Handle back button press
     BackHandler {
         setState(UserState.InMainMenu)
         onNavigateToMainMenu()
     }
 
+    // Core state management
     val context = LocalContext.current
     val viewModel = MainViewModel(context, setState = { setState(it) })
 
+    // QR code and game joining states
     var qrCodeBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var scannedGameUuid by remember { mutableStateOf<String?>(null) }
     var scannedDeviceAddress by remember { mutableStateOf<String?>(null) }
     var scannedDevicePreamble by remember { mutableStateOf<String?>(null) }
 
+    // Game session states
     var gameDetails by remember { mutableStateOf<Game?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // UWB device states
     val deviceAddress by UwbManagerSingleton.address.collectAsState(initial = "-1")
     val devicePreamble by UwbManagerSingleton.preamble.collectAsState(initial = "-1")
 
+    // Permission handling
     var permissionGranted by remember { mutableStateOf(false) }
 
+    // Real-time game subscription state
     var gameSubscription by remember { mutableStateOf<Game?>(null) }
 
+    // Initial setup effect
     LaunchedEffect(Unit) {
         setState(UserState.InGameCreation)
-
+        // Check/request UWB permissions
         permissionGranted = ContextCompat.checkSelfPermission(
             context, Manifest.permission.UWB_RANGING
         ) == PackageManager.PERMISSION_GRANTED
         if (!permissionGranted) {
             ActivityCompat.requestPermissions(
-                context as Activity, arrayOf(Manifest.permission.UWB_RANGING), 101
+                context as Activity,
+                arrayOf(Manifest.permission.UWB_RANGING),
+                101
             )
         }
 
@@ -90,6 +109,7 @@ fun CreateGameScreen(
         UwbManagerSingleton.initialize(context, true)
     }
 
+    // Subscribe to game updates when game is created/joined
     if (gameDetails != null) {
         LaunchedEffect(gameDetails!!.uuid) {
             viewModel.supabaseRealtime.subscribeToGame(
@@ -101,6 +121,7 @@ fun CreateGameScreen(
         }
     }
 
+    // UI Layout
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -215,6 +236,13 @@ fun CreateGameScreen(
     }
 }
 
+/**
+ * Generates a QR code containing game session details
+ * @param gameUuid Unique identifier for the game session
+ * @param deviceAddress UWB device address of the game creator
+ * @param devicePreamble UWB preamble code of the game creator
+ * @return Bitmap containing the QR code or null if generation fails
+ */
 private fun generateQRCode(gameUuid: String, deviceAddress: String, devicePreamble: String): Bitmap? {
     val qrData = JSONObject().apply {
         put("game_uuid", gameUuid)

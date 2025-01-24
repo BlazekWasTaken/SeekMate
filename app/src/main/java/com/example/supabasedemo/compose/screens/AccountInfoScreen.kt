@@ -20,18 +20,29 @@ import com.example.supabasedemo.compose.viewModels.MainViewModel
 import com.example.supabasedemo.data.model.UserState
 import com.example.supabasedemo.ui.theme.AppTheme
 
+/**
+ * Screen that displays the authenticated user's account information.
+ * Currently shows the user's email address in a simple layout.
+ * Provides back navigation to the settings screen.
+ */
+
 @Composable
 fun AccountInfoScreen(
+    // Navigate back to settings screen
     onNavigateToSettings: () -> Unit,
+    // Update app-wide user state
     setState: (state: UserState) -> Unit
 ){
+    // Set user state when screen becomes active
     LaunchedEffect(Unit) {
         setState(UserState.InAccountInfo)
     }
 
+    // Initialize view model and get current user's email
     val viewModel = MainViewModel(LocalContext.current, setState = { setState(it) })
     val userEmail = viewModel.supabaseAuth.getCurrentUserInfo().email.toString()
 
+    // Main layout container
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,6 +50,7 @@ fun AccountInfoScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+        // Email display section
         Text(
             text = "E-mail:"
         )
@@ -50,6 +62,7 @@ fun AccountInfoScreen(
             Text(text = userEmail)
         }
 
+        // Handle back button press
         BackHandler {
             setState(UserState.InSettings)
             onNavigateToSettings()

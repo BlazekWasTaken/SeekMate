@@ -19,25 +19,36 @@ import com.example.supabasedemo.data.network.fixForScreen
 import com.example.supabasedemo.ui.theme.AppTheme
 import java.util.Locale
 
+/**
+ * A composable view that displays real-time gyroscope sensor data.
+ * Utilizes SensorManagerSingleton to access device gyroscope readings
+ * and displays X, Y, Z rotation values in a bordered box.
+ */
+
 @Composable
 fun GyroscopeView(
-    context: Context
+    context: Context // Required to initialize sensor manager
 ) {
+    // Collect latest gyroscope readings as state
     val gyroscopes by SensorManagerSingleton.gyroscopeReadingsFlow.collectAsState()
+
+    // Initialize sensor manager when view is first composed
     LaunchedEffect(Unit) {
         SensorManagerSingleton.initialize(context)
     }
 
+    // Container with border outline
     Box(
         modifier = Modifier.border(1.dp, AppTheme.colorScheme.outline)
     ) {
+        // Display gyroscope readings in vertical layout
         Column(
-            modifier = Modifier
-                .padding(4.dp),
+            modifier = Modifier.padding(4.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = "GYROSCOPE")
+            // Display formatted X, Y, Z rotation values
             Text(text = "x: " + gyroscopes.last().x.fixForScreen())
             Text(text = "y: " + gyroscopes.last().y.fixForScreen())
             Text(text = "z: " + gyroscopes.last().z.fixForScreen())
