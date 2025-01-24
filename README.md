@@ -9,14 +9,15 @@
     - [1.2 Project Description](#12-project-description)
     - [1.3 🎯 Objectives](#13--objectives)
   - [2. 📋 Team Project Summary](#2--team-project-summary)
-  - [3. ✨ Features](#3--features)
-  - [4. ⚙️ Technologies Used](#4-️-technologies-used)
-  - [5. 📝 Diagrams](#5--diagrams)
-    - [1. Game Loop Flow](#1-game-loop-flow)
-    - [2. UWB Page Access Flow](#2-uwb-page-access-flow)
-  - [6. 📊 Measurement Results](#6--measurement-results)
-  - [7. System Requirements](#7-system-requirements)
-  - [8. 📜 Application Configuration Instructions](#8--application-configuration-instructions)
+  - [3. 📷 Application User Manual](#3--application-user-manual)
+  - [4. ✨ Features](#4--features)
+  - [5. ⚙️ Technologies Used](#5-️-technologies-used)
+  - [6. 📝 Diagrams](#6--diagrams)
+    - [6.1 🔄 Game Loop Flow](#61--game-loop-flow)
+    - [6.2 📶 UWB Page Access Flow](#62--uwb-page-access-flow)
+  - [7. 📊 Measurement Results](#7--measurement-results)
+  - [8. 📜 System Requirements](#8--system-requirements)
+  - [9. 🛠️ Application Configuration Instructions](#9-️-application-configuration-instructions)
 
 ---
 
@@ -43,17 +44,24 @@ Utilizes Ultra-Wideband (UWB) technology to create a turn-based mobile game of H
 
 ---
 
-### 3. ✨ Features
+### 3. 📷 Application User Manual
+
+To provide a visual understanding of the app's interface and functionalities, we have compiled a collection of screenshots in a PDF document. You can access it using the link below:
+
+[🔗 View Application Manual (PDF)](./docs/assets/User_Manual_Seekmate.pdf)
+
+
+### 4. ✨ Features
 
 -   **📱 Relative Location Recording**: Real-time measurement of relative positions between paired devices via UWB
 -   **🔗 Pairing UWB Phones via QR Code**: Device pairing for improved convenience
 -   **🎯 360° Directional Arrow**: Visual arrow pointing to the other device, dynamically updating within 360 degrees
 -   **📏 Accuracy Metrics**: Display the location measurements.
--   **🌐 Cloud Integration**: Synchronize data with cloud storage solutions.
+-   **☁️ Cloud Integration**: Synchronize data with cloud storage solutions.
 
 ---
 
-### 4. ⚙️ Technologies Used
+### 5. ⚙️ Technologies Used
 
 The project uses the following technologies:
 
@@ -64,9 +72,9 @@ The project uses the following technologies:
 
 ---
 
-### 5. 📝 Diagrams
+### 6. 📝 Diagrams
 
-#### 1. Game Loop Flow
+#### 6.1 🔄 Game Loop Flow
 
 ```mermaid
 graph TD;
@@ -85,7 +93,7 @@ graph TD;
     Z --> M
 ```
 
-#### 2. UWB Page Access Flow
+#### 6.2 📶 UWB Page Access Flow
 
 ```mermaid
 graph TD;
@@ -100,13 +108,13 @@ graph TD;
 
 ---
 
-### 6. 📊 Measurement Results
+### 7. 📊 Measurement Results
 
 [🔗 Go to Measurement Results](./docs/measurements/Measurements.md)
 
 ---
 
-### 7. System Requirements
+### 8. 📜 System Requirements
 
 -   **OS**: Android 15
 -   **AGP**: Android Gradle plugin 8.8.0
@@ -115,7 +123,7 @@ graph TD;
 
 ---
 
-### 8. 📜 Application Configuration Instructions
+### 9. 🛠️ Application Configuration Instructions
 
 [🔗 Go to Instructions](./docs/configuration/Supabase.md)
 
